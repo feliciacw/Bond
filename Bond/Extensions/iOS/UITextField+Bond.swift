@@ -46,10 +46,10 @@ extension UITextField {
         }
       }
       
-      self.bnd_controlEvent.filter { $0 == UIControlEvents.EditingChanged }.observe { [weak self, weak bnd_text] event in
+      self.bnd_controlEvent.filter { $0 == UIControlEvents.editingChanged }.observe { [weak self, weak bnd_text] event in
         guard let unwrappedSelf = self, let bnd_text = bnd_text else { return }
         updatingFromSelf = true
-        bnd_text.next(unwrappedSelf.text)
+        bnd_text.next(event: unwrappedSelf.text)
         updatingFromSelf = false
       }
       
@@ -72,10 +72,10 @@ extension UITextField {
         }
       }
       
-      self.bnd_controlEvent.filter { $0 == UIControlEvents.EditingChanged }.observe { [weak self, weak bnd_attributedText] event in
+      self.bnd_controlEvent.filter { $0 == UIControlEvents.editingChanged }.observe { [weak self, weak bnd_attributedText] event in
         guard let unwrappedSelf = self, let bnd_attributedText = bnd_attributedText else { return }
         updatingFromSelf = true
-        bnd_attributedText.next(unwrappedSelf.attributedText)
+        bnd_attributedText.next(event: unwrappedSelf.attributedText)
         updatingFromSelf = false
       }
       
@@ -84,7 +84,7 @@ extension UITextField {
   }
   
   public var bnd_textColor: Observable<UIColor?> {
-    return bnd_associatedObservableForValueForKey("textColor")
+    return bnd_associatedObservableForValueForKey(key: "textColor")
   }
 }
 

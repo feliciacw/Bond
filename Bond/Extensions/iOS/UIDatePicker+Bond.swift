@@ -47,10 +47,10 @@ extension UIDatePicker {
         }
       }
       
-      self.bnd_controlEvent.filter { $0 == UIControlEvents.ValueChanged }.observe { [weak self, weak bnd_date] event in
+      self.bnd_controlEvent.filter { $0 == UIControlEvents.valueChanged }.observe { [weak self, weak bnd_date] event in
         guard let unwrappedSelf = self, let bnd_date = bnd_date else { return }
         updatingFromSelf = true
-        bnd_date.next(unwrappedSelf.date)
+        bnd_date.next(event: unwrappedSelf.date)
         updatingFromSelf = false
       }
       

@@ -34,14 +34,14 @@ public protocol EventProducerType {
   var replayLength: Int { get }
   
   /// Registers the given observer and returns a disposable that can cancel observing.
-  func observe(observer: EventType -> Void) -> DisposableType
+  func observe(observer: (EventType) -> Void) -> DisposableType
 }
 
 public extension EventProducerType {
   
   /// Registers the observer that will receive only events generated after registering.
   /// A better performing verion of observable.skip(observable.replyLength).observe().
-  public func observeNew(observer: EventType -> Void) -> DisposableType {
+  public func observeNew(observer: (EventType) -> Void) -> DisposableType {
     var skip: Int = replayLength
     return observe { value in
       if skip > 0 {
@@ -56,7 +56,7 @@ public extension EventProducerType {
   /// and returns a disposable that can cancel observing.
   public func bindTo<B: BindableType where B.Element == EventType>(bindable: B) -> DisposableType {
     let disposable = SerialDisposable(otherDisposable: nil)
-    let sink = bindable.sink(disposable)
+    let sink = bindable.sink(disconnectDisposable: disposable)
     disposable.otherDisposable = observe { value in
       sink(value)
     }
@@ -67,7 +67,7 @@ public extension EventProducerType {
   /// and returns a disposable that can cancel observing.
   public func bindTo<B: BindableType where B.Element == Optional<EventType>>(bindable: B) -> DisposableType {
     let disposable = SerialDisposable(otherDisposable: nil)
-    let sink = bindable.sink(disposable)
+    let sink = bindable.sink(disconnectDisposable: disposable)
     disposable.otherDisposable = observe { value in
       sink(value)
     }
@@ -75,7 +75,7 @@ public extension EventProducerType {
   }
   
   /// Transformes each event by the given `transform` function.
-  public func map<T>(transform: EventType -> T) -> EventProducer<T> {
+  public func map<T>(transform: (EventType) -> T) -> EventProducer<T> {
     return EventProducer(replayLength: replayLength) { sink in
       return observe { event in
         sink(transform(event))
@@ -84,7 +84,7 @@ public extension EventProducerType {
   }
   
   /// Forwards only events for which the given closure returns 'true'.
-  public func filter(includeEvent: EventType -> Bool) -> EventProducer<EventType> {
+  public func filter(includeEvent: (EventType) -> Bool) -> EventProducer<EventType> {
     return EventProducer(replayLength: replayLength) { sink in
       return observe { event in
         if includeEvent(event) {
@@ -114,7 +114,7 @@ public extension EventProducerType {
         lastEvent = event
         if shouldDispatch {
           shouldDispatch = false
-          queue.after(seconds) {
+          queue.after(interval: seconds) {
             sink(lastEvent)
             lastEvent = nil
             shouldDispatch = true
@@ -175,12 +175,12 @@ public extension EventProducerType {
     }
   }
   
-  public func flatMap<U: EventProducerType>(strategy: ObservableFlatMapStrategy, transform: EventType -> U) -> EventProducer<U.EventType> {
+  public func flatMap<U: EventProducerType>(strategy: ObservableFlatMapStrategy, transform: (EventType) -> U) -> EventProducer<U.EventType> {
     switch strategy {
     case .Latest:
-      return map(transform).switchToLatest()
+      return map(transform: transform).switchToLatest()
     case .Merge:
-      return map(transform).merge()
+      return map(transform: transform).merge()
     }
   }
   
@@ -200,8 +200,8 @@ public extension EventProducerType where Self: BindableType {
   /// Establishes a one-way binding between the source and the bindable's sink
   /// and returns a disposable that can cancel observing.
   public func bidirectionalBindTo<B: BindableType where B: EventProducerType, B.EventType == Element, B.Element == EventType>(bindable: B) -> DisposableType {
-    let d1 = bindTo(bindable)
-    let d2 = bindable.bindTo(self)
+    let d1 = bindTo(bindable: bindable)
+    let d2 = bindable.bindTo(bindable: self)
     return CompositeDisposable([d1, d2])
   }
 }
@@ -290,64 +290,64 @@ extension EventProducerType where EventType: OptionalType, EventType.WrappedType
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType>(a: A, _ b: B) -> EventProducer<(A.EventType, B.EventType)> {
-  return a.combineLatestWith(b)
+  return a.combineLatestWith(other: b)
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType>(a: A, _ b: B, _ c: C) -> EventProducer<(A.EventType, B.EventType, C.EventType)> {
-  return combineLatest(a, b).combineLatestWith(c).map { ($0.0, $0.1, $1) }
+  return combineLatest(a: a, b).combineLatestWith(other: c).map { ($0.0, $0.1, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType>(a: A, _ b: B, _ c: C, _ d: D) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType)> {
-  return combineLatest(a, b, c).combineLatestWith(d).map { ($0.0, $0.1, $0.2, $1) }
+  return combineLatest(a: a, b, c).combineLatestWith(other: d).map { ($0.0, $0.1, $0.2, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType>
   (a: A, _ b: B, _ c: C, _ d: D, _ e: E) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType)>
 {
-  return combineLatest(a, b, c, d).combineLatestWith(e).map { ($0.0, $0.1, $0.2, $0.3, $1) }
+  return combineLatest(a: a, b, c, d).combineLatestWith(other: e).map { ($0.0, $0.1, $0.2, $0.3, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType>
   ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType)>
 {
-  return combineLatest(a, b, c, d, e).combineLatestWith(f).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $1) }
+  return combineLatest(a: a, b, c, d, e).combineLatestWith(other: f).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType, G: EventProducerType>
   ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType)>
 {
-  return combineLatest(a, b, c, d, e, f).combineLatestWith(g).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $1) }
+  return combineLatest(a: a, b, c, d, e, f).combineLatestWith(other: g).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType, G: EventProducerType, H: EventProducerType>
   ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType)>
 {
-  return combineLatest(a, b, c, d, e, f, g).combineLatestWith(h).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $1) }
+  return combineLatest(a: a, b, c, d, e, f, g).combineLatestWith(other: h).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType, G: EventProducerType, H: EventProducerType, I: EventProducerType>
   ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType, I.EventType)>
 {
-  return combineLatest(a, b, c, d, e, f, g, h).combineLatestWith(i).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $1) }
+  return combineLatest(a: a, b, c, d, e, f, g, h).combineLatestWith(other: i).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType, G: EventProducerType, H: EventProducerType, I: EventProducerType, J: EventProducerType>
   ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I, _ j: J) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType, I.EventType, J.EventType)>
 {
-  return combineLatest(a, b, c, d, e, f, g, h, i).combineLatestWith(j).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $0.8, $1) }
+  return combineLatest(a: a, b, c, d, e, f, g, h, i).combineLatestWith(other: j).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $0.8, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType, G: EventProducerType, H: EventProducerType, I: EventProducerType, J: EventProducerType, K: EventProducerType>
   ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I, _ j: J, _ k: K) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType, I.EventType, J.EventType, K.EventType)>
 {
-  return combineLatest(a, b, c, d, e, f, g, h, i, j).combineLatestWith(k).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $0.8, $0.9, $1) }
+  return combineLatest(a: a, b, c, d, e, f, g, h, i, j).combineLatestWith(other: k).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $0.8, $0.9, $1) }
 }
 
-public func merge<S: SequenceType where S.Generator.Element: EventProducerType>(sequence: S) -> EventProducer<S.Generator.Element.EventType> {
+public func merge<S: Sequence where S.Iterator.Element: EventProducerType>(sequence: S) -> EventProducer<S.Iterator.Element.EventType> {
   return EventProducer { sink in
     let compositeDisposable = CompositeDisposable()
     sequence.forEach { producer in
-      compositeDisposable += producer.observe(sink)
+      compositeDisposable += producer.observe(observer: sink)
     }
     return compositeDisposable
   }

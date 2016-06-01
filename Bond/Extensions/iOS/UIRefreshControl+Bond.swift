@@ -29,7 +29,7 @@ import UIKit
 extension UIRefreshControl {
   
   public var bnd_refreshing: Observable<Bool> {
-    return bnd_associatedObservableForValueForKey("refreshing") { [weak self] value in
+    return bnd_associatedObservableForValueForKey(key: "refreshing") { [weak self] value in
       if value {
         self?.beginRefreshing()
       } else {

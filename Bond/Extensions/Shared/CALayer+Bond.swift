@@ -27,14 +27,14 @@ import QuartzCore
 extension CALayer {
   
   public var bnd_opacity: Observable<Float> {
-    return bnd_associatedObservableForValueForKey("opacity")
+    return bnd_associatedObservableForValueForKey(key: "opacity")
   }
   
   public var bnd_backgroundColor: Observable<CGColor?> {
-    return bnd_associatedObservableForValueForKey("backgroundColor")
+    return bnd_associatedObservableForValueForKey(key: "backgroundColor")
   }
   
   public var bnd_contents: Observable<AnyObject?> {
-    return bnd_associatedObservableForValueForKey("contents")
+    return bnd_associatedObservableForValueForKey(key: "contents")
   }
 }

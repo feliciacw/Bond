@@ -49,9 +49,9 @@ public extension NSObject {
   
   var object: NSObject
   let keyPath: String
-  let listener: AnyObject? -> Void
+  let listener: (AnyObject?) -> Void
   
-  init(object: NSObject, keyPath: String, options: NSKeyValueObservingOptions, listener: AnyObject? -> Void) {
+  init(object: NSObject, keyPath: String, options: NSKeyValueObservingOptions, listener: (AnyObject?) -> Void) {
     self.object = object
     self.keyPath = keyPath
     self.listener = listener
@@ -67,7 +67,7 @@ public extension NSObject {
     object.removeObserver(self, forKeyPath: keyPath)
   }
   
-  override dynamic func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+  override dynamic func observeValue(forKeyPath keyPath: String?, of object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>?) {
     if context == &BNDKVOObserver.XXContext {
       if let newValue: AnyObject? = change?[NSKeyValueChangeNewKey] {
         listener(newValue)
@@ -80,7 +80,7 @@ public extension Observable {
   
   public convenience init(object: NSObject, keyPath: String) {
     
-    if let value = object.valueForKeyPath(keyPath) as? Wrapped {
+    if let value = object.value(forKeyPath: keyPath) as? Wrapped {
       self.init(value)
     } else {
       fatalError("Dear Sir/Madam, you are creating a Scalar of non-optional \(EventType.self) type, but the value at the given key path is nil or not of \(EventType.self) type. Please check the type or have your Scalar encapsulate optional type like Scalar<\(EventType.self)?>.")
@@ -88,7 +88,7 @@ public extension Observable {
     
     var updatingFromSelf = false
     
-    let observer = BNDKVOObserver(object: object, keyPath: keyPath, options: .New) { [weak self] value in
+    let observer = BNDKVOObserver(object: object, keyPath: keyPath, options: .new) { [weak self] value in
       updatingFromSelf = true
       if let value = value as? EventType {
         self?.value = value
@@ -98,9 +98,9 @@ public extension Observable {
       updatingFromSelf = false
     }
     
-    observeNew { value in
+    let _ = observeNew { value in
       if !updatingFromSelf {
-        observer.set(value as? AnyObject)
+        observer.set(value: value as? AnyObject)
       }
     }
   }
@@ -111,7 +111,7 @@ public extension Observable where Wrapped: OptionalType {
   public convenience init(object: NSObject, keyPath: String) {
     
     let initialValue: Wrapped.WrappedType?
-    if let value = object.valueForKeyPath(keyPath) as? Wrapped.WrappedType {
+    if let value = object.value(forKeyPath: keyPath) as? Wrapped.WrappedType {
       initialValue = value
     } else {
       initialValue = nil
@@ -121,7 +121,7 @@ public extension Observable where Wrapped: OptionalType {
     
     var updatingFromSelf = false
     
-    let observer = BNDKVOObserver(object: object, keyPath: keyPath, options: .New) { [weak self] value in
+    let observer = BNDKVOObserver(object: object, keyPath: keyPath, options: .new) { [weak self] value in
       updatingFromSelf = true
       if let value = value as? EventType.WrappedType {
         self?.value = EventType(optional: value)
@@ -131,9 +131,9 @@ public extension Observable where Wrapped: OptionalType {
       updatingFromSelf = false
     }
     
-    observeNew { value in
+    let _ = observeNew { value in
       if !updatingFromSelf {
-        observer.set(value.value as? AnyObject)
+        observer.set(value: value.value as? AnyObject)
       }
     }
   }
@@ -150,14 +150,14 @@ public extension NSObject {
     }
   }
   
-  public func bnd_associatedObservableForValueForKey<T>(key: String, initial: T? = nil, set: (T -> Void)? = nil) -> Observable<T> {
+  public func bnd_associatedObservableForValueForKey<T>(key: String, initial: T? = nil, set: ((T) -> Void)? = nil) -> Observable<T> {
     if let observable: AnyObject = bnd_associatedObservables[key] {
       return observable as! Observable<T>
     } else {
-      let observable = Observable<T>(initial ?? self.valueForKey(key) as! T)
+      let observable = Observable<T>(initial ?? self.value(forKey: key) as! T)
       bnd_associatedObservables[key] = observable
       
-      observable
+      let _ = observable
         .observeNew { [weak self] (value: T) in
           if let set = set {
             set(value)
@@ -174,14 +174,14 @@ public extension NSObject {
     }
   }
   
-  public func bnd_associatedObservableForValueForKey<T: OptionalType>(key: String, initial: T? = nil, set: (T -> Void)? = nil) -> Observable<T> {
+  public func bnd_associatedObservableForValueForKey<T: OptionalType>(key: String, initial: T? = nil, set: ((T) -> Void)? = nil) -> Observable<T> {
     if let observable: AnyObject = bnd_associatedObservables[key] {
       return observable as! Observable<T>
     } else {
       let observable: Observable<T>
       if let initial = initial {
         observable = Observable(initial)
-      } else if let value = self.valueForKey(key) as? T.WrappedType {
+      } else if let value = self.value(forKey: key) as? T.WrappedType {
         observable = Observable(T(optional: value))
       } else {
         observable = Observable(T(optional: nil))
@@ -189,7 +189,7 @@ public extension NSObject {
       
       bnd_associatedObservables[key] = observable
       
-      observable
+      let _ = observable
         .observeNew { [weak self] (value: T) in
           if let set = set {
             set(value)

@@ -27,14 +27,14 @@ import UIKit
 extension UILabel {
   
   public var bnd_text: Observable<String?> {
-    return bnd_associatedObservableForValueForKey("text")
+    return bnd_associatedObservableForValueForKey(key: "text")
   }
   
   public var bnd_attributedText: Observable<NSAttributedString?> {
-    return bnd_associatedObservableForValueForKey("attributedText")
+    return bnd_associatedObservableForValueForKey(key: "attributedText")
   }
   
   public var bnd_textColor: Observable<UIColor?> {
-    return bnd_associatedObservableForValueForKey("textColor")
+    return bnd_associatedObservableForValueForKey(key: "textColor")
   }
 }

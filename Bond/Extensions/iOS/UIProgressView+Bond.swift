@@ -27,6 +27,6 @@ import UIKit
 extension UIProgressView {
   
   public var bnd_progress: Observable<Float> {
-    return bnd_associatedObservableForValueForKey("progress")
+    return bnd_associatedObservableForValueForKey(key: "progress")
   }
 }

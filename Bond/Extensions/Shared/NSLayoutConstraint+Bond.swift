@@ -31,6 +31,6 @@
 extension NSLayoutConstraint {
 
   public var bnd_active: Observable<Bool> {
-    return bnd_associatedObservableForValueForKey("active")
+    return bnd_associatedObservableForValueForKey(key: "active")
   }
 }

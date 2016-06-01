@@ -26,15 +26,15 @@
 /// ObservableArray event encapsulates current state of the array, as well
 /// as the operation that has triggered an event.
 public protocol ObservableArrayEventType {
-  associatedtype ObservableArrayEventSequenceType: SequenceType
+  associatedtype ObservableArrayEventSequenceType: Sequence
   var sequence: ObservableArrayEventSequenceType { get }
-  var operation: ObservableArrayOperation<ObservableArrayEventSequenceType.Generator.Element> { get }
+  var operation: ObservableArrayOperation<ObservableArrayEventSequenceType.Iterator.Element> { get }
 }
 
 /// A concrete array event type.
-public struct ObservableArrayEvent<ObservableArrayEventSequenceType: SequenceType>: ObservableArrayEventType {
+public struct ObservableArrayEvent<ObservableArrayEventSequenceType: Sequence>: ObservableArrayEventType {
   public let sequence: ObservableArrayEventSequenceType
-  public let operation: ObservableArrayOperation<ObservableArrayEventSequenceType.Generator.Element>
+  public let operation: ObservableArrayOperation<ObservableArrayEventSequenceType.Iterator.Element>
 }
 
 /// Represents an operation that can be applied to a ObservableArray.
@@ -72,7 +72,7 @@ public func ==(lhs: ObservableArrayEventChangeSet, rhs: ObservableArrayEventChan
 public extension ObservableArrayOperation {
   
   /// Maps elements encapsulated in the operation.
-  public func map<X>(transform: ElementType -> X) -> ObservableArrayOperation<X> {
+  public func map<X>(transform: (ElementType) -> X) -> ObservableArrayOperation<X> {
     switch self {
     case .Reset(let array):
       return .Reset(array: array.map(transform))
@@ -83,16 +83,16 @@ public extension ObservableArrayOperation {
     case .Remove(let range):
       return .Remove(range: range)
     case .Batch(let operations):
-      return .Batch(operations.map{ $0.map(transform) })
+      return .Batch(operations.map{ $0.map(transform: transform) })
     }
   }
   
-  public func filter(includeElement: ElementType -> Bool, inout pointers: [Int]) -> ObservableArrayOperation<ElementType>? {
+  public func filter(includeElement: (ElementType) -> Bool, pointers: inout [Int]) -> ObservableArrayOperation<ElementType>? {
     
     switch self {
     case .Insert(let elements, let fromIndex):
       
-      for (index, element) in pointers.enumerate() {
+      for (index, element) in pointers.enumerated() {
         if element >= fromIndex {
           pointers[index] = element + elements.count
         }
@@ -101,7 +101,7 @@ public extension ObservableArrayOperation {
       var insertedIndices: [Int] = []
       var insertedElements: [ElementType] = []
       
-      for (index, element) in elements.enumerate() {
+      for (index, element) in elements.enumerated() {
         if includeElement(element) {
           insertedIndices.append(fromIndex + index)
           insertedElements.append(element)
@@ -109,8 +109,8 @@ public extension ObservableArrayOperation {
       }
       
       if insertedIndices.count > 0 {
-        let insertionPoint = startingIndexForIndex(fromIndex, forPointers: pointers)
-        pointers.insertContentsOf(insertedIndices, at: insertionPoint)
+        let insertionPoint = startingIndexForIndex(x: fromIndex, forPointers: pointers)
+        pointers.insert(contentsOf: insertedIndices, at: insertionPoint)
         return .Insert(elements: insertedElements, fromIndex: insertionPoint)
       }
       
@@ -118,24 +118,24 @@ public extension ObservableArrayOperation {
       
       var operations: [ObservableArrayOperation<ElementType>] = []
       
-      for (index, element) in elements.enumerate() {
+      for (index, element) in elements.enumerated() {
         let realIndex = fromIndex + index
         
         // if element on this index is currently included in filtered array
-        if let location = pointers.indexOf(realIndex) {
+        if let location = pointers.index(of: realIndex) {
           if includeElement(element) {
             // update
             operations.append(.Update(elements: [element], fromIndex: location))
           } else {
             // remove
-            pointers.removeAtIndex(location)
+            pointers.remove(at: location)
             operations.append(.Remove(range: location..<location+1))
           }
         } else { // element in this index is currently NOT included
           if includeElement(element) {
             // insert
-            let insertionPoint = startingIndexForIndex(realIndex, forPointers: pointers)
-            pointers.insert(realIndex, atIndex: insertionPoint)
+            let insertionPoint = startingIndexForIndex(x: realIndex, forPointers: pointers)
+            pointers.insert(realIndex, at: insertionPoint)
             operations.append(.Insert(elements: [element], fromIndex: insertionPoint))
           } else {
             // not contained, not inserted - do nothing
@@ -154,9 +154,9 @@ public extension ObservableArrayOperation {
       var startIndex = -1
       var endIndex = -1
       
-      for (index, element) in pointers.enumerate() {
-        if element >= range.startIndex {
-          if element < range.endIndex {
+      for (index, element) in pointers.enumerated() {
+        if element >= range.lowerBound {
+          if element < range.upperBound {
             if startIndex < 0 {
               startIndex = index
               endIndex = index + 1
@@ -171,12 +171,12 @@ public extension ObservableArrayOperation {
       
       if startIndex >= 0 {
         let removedRange = Range(startIndex..<endIndex)
-        pointers.removeRange(removedRange)
+        pointers.removeSubrange(removedRange)
         return .Remove(range: removedRange)
       }
       
     case .Reset(let array):
-      pointers = pointersFromSequence(array, includeElement: includeElement)
+      pointers = pointersFromSequence(sequence: array, includeElement: includeElement)
       return .Reset(array: array.filter(includeElement))
       
     case .Batch(let operations):
@@ -184,7 +184,7 @@ public extension ObservableArrayOperation {
       var filteredOperations: [ObservableArrayOperation<ElementType>] = []
       
       for operation in operations {
-        if let filtered = operation.filter(includeElement, pointers: &pointers) {
+        if let filtered = operation.filter(includeElement: includeElement, pointers: &pointers) {
           filteredOperations.append(filtered)
         }
       }
@@ -216,9 +216,9 @@ public extension ObservableArrayOperation {
   }
 }
 
-internal func pointersFromSequence<S: SequenceType>(sequence: S, includeElement: S.Generator.Element -> Bool) -> [Int] {
+internal func pointersFromSequence<S: Sequence>(sequence: S, includeElement: (S.Iterator.Element) -> Bool) -> [Int] {
   var pointers: [Int] = []
-  for (index, element) in sequence.enumerate() {
+  for (index, element) in sequence.enumerated() {
     if includeElement(element) {
       pointers.append(index)
     }
@@ -228,7 +228,7 @@ internal func pointersFromSequence<S: SequenceType>(sequence: S, includeElement:
 
 internal func startingIndexForIndex(x: Int, forPointers pointers: [Int]) -> Int {
   var idx: Int = -1
-  for (index, element) in pointers.enumerate() {
+  for (index, element) in pointers.enumerated() {
     if element < x {
       idx = index
     } else {
@@ -254,7 +254,7 @@ public func operationStartIndex<T>(operation: ObservableArrayOperation<T>) -> In
   case .Insert(_, let fromIndex):
     return fromIndex
   case .Remove(let range):
-    return range.startIndex
+    return range.lowerBound
   default:
     return 0
   }
@@ -285,7 +285,7 @@ public func changeSetsFromBatchOperations<T>(operations: [ObservableArrayOperati
   var updates = Set<Int>()
   var deletes = Set<Int>()
   
-  for (operationIndex, operation) in operations.enumerate() {
+  for (operationIndex, operation) in operations.enumerated() {
     switch operation {
     case .Insert(let elements, let fromIndex):
       // Inserts are always indexed in the index-space of the array as it will look like when all operations are applies
@@ -338,7 +338,7 @@ public func changeSetsFromBatchOperations<T>(operations: [ObservableArrayOperati
       updates.subtractInPlace(newDeletes)
 
       // Deletes shift preceding inserts at higher indices
-      inserts = Set(inserts.map { $0 >= range.startIndex ? $0 - range.count : $0 })
+      inserts = Set(inserts.map { $0 >= range.lowerBound ? $0 - range.count : $0 })
       
     case .Reset:
       fatalError("Dear Sir/Madam, the .Reset operation within the .Batch is not supported at the moment!")

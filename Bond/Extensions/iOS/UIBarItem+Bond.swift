@@ -27,14 +27,14 @@ import UIKit
 extension UIBarItem {
 
   public var bnd_title: Observable<String?> {
-    return bnd_associatedObservableForValueForKey("title")
+    return bnd_associatedObservableForValueForKey(key: "title")
   }
   
   public var bnd_image: Observable<UIImage?> {
-    return bnd_associatedObservableForValueForKey("image")
+    return bnd_associatedObservableForValueForKey(key: "image")
   }
   
   public var bnd_enabled: Observable<Bool> {
-    return bnd_associatedObservableForValueForKey("enabled")
+    return bnd_associatedObservableForValueForKey(key: "enabled")
   }
 }

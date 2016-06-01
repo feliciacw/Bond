@@ -34,13 +34,13 @@ public final class Observable<Wrapped>: EventProducer<Wrapped> {
       return replayBuffer!.last!
     }
     set {
-      next(newValue)
+      next(event: newValue)
     }
   }
   
   /// Creates a observable with the given initial value.
   public init(_ value: Wrapped) {
     super.init(replayLength: 1)
-    next(value)
+    next(event: value)
   }
 }

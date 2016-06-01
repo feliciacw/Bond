@@ -27,6 +27,6 @@ import UIKit
 extension UINavigationBar {
 
   public var bnd_barTintColor: Observable<UIColor?> {
-    return bnd_associatedObservableForValueForKey("barTintColor")
+    return bnd_associatedObservableForValueForKey(key: "barTintColor")
   }
 }

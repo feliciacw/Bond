@@ -27,22 +27,22 @@ import UIKit
 extension UIView {
 
   public var bnd_alpha: Observable<CGFloat> {
-    return bnd_associatedObservableForValueForKey("alpha")
+    return bnd_associatedObservableForValueForKey(key: "alpha")
   }
   
   public var bnd_backgroundColor: Observable<UIColor?> {
-    return bnd_associatedObservableForValueForKey("backgroundColor")
+    return bnd_associatedObservableForValueForKey(key: "backgroundColor")
   }
   
   public var bnd_hidden: Observable<Bool> {
-    return bnd_associatedObservableForValueForKey("hidden")
+    return bnd_associatedObservableForValueForKey(key: "hidden")
   }
   
   public var bnd_userInteractionEnabled: Observable<Bool> {
-    return bnd_associatedObservableForValueForKey("userInteractionEnabled")
+    return bnd_associatedObservableForValueForKey(key: "userInteractionEnabled")
   }
 
   public var bnd_tintColor: Observable<UIColor?> {
-    return bnd_associatedObservableForValueForKey("tintColor")
+    return bnd_associatedObservableForValueForKey(key: "tintColor")
   }
 }

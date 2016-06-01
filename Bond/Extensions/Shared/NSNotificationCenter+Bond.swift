@@ -28,11 +28,11 @@ extension NSNotificationCenter {
   
   public func bnd_notification(name: String, object: AnyObject?) -> EventProducer<NSNotification> {
     return EventProducer { sink in
-      let subscription = NSNotificationCenter.defaultCenter().addObserverForName(name, object: object, queue: nil, usingBlock: { notification in
+      let subscription = NSNotificationCenter.default().addObserver(forName: name, object: object, queue: nil, using: { notification in
         sink(notification)
       })
       return BlockDisposable {
-        NSNotificationCenter.defaultCenter().removeObserver(subscription)
+        NSNotificationCenter.default().removeObserver(subscription)
       }
     }
   }

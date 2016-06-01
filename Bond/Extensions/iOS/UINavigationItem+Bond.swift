@@ -27,6 +27,6 @@ import UIKit
 extension UINavigationItem {
   
   public var bnd_title: Observable<String?> {
-    return bnd_associatedObservableForValueForKey("title")
+    return bnd_associatedObservableForValueForKey(key: "title")
   }
 }

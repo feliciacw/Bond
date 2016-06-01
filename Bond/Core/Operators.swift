@@ -32,16 +32,16 @@ infix operator ->>< { associativity left precedence 95 }
 
 /// Establishes a unidirectional binding between the source observer and the destination sink.
 public func ->> <O: EventProducerType, B: BindableType where B.Element == O.EventType>(source: O, destination: B) -> DisposableType {
-  return source.bindTo(destination)
+  return source.bindTo(bindable: destination)
 }
 
 public func ->> <O: EventProducerType, B: BindableType where B.Element == Optional<O.EventType>>(source: O, destination: B) -> DisposableType {
-  return source.bindTo(destination)
+  return source.bindTo(bindable: destination)
 }
 
 /// Establishes a bidirectional binding between the source and the destination.
 public func ->>< <B: BindableType where B: EventProducerType, B.Element == B.EventType>(source: B, destination: B) -> DisposableType {
-  let d1 = source.bindTo(destination)
-  let d2 = destination.bindTo(source)
+  let d1 = source.bindTo(bindable: destination)
+  let d2 = destination.bindTo(bindable: source)
   return CompositeDisposable([d1, d2])
 }

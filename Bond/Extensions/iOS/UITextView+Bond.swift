@@ -46,13 +46,13 @@ extension UITextView {
         }
       }
       
-      NSNotificationCenter.defaultCenter().bnd_notification(UITextViewTextDidChangeNotification, object: self).observe { [weak bnd_text] notification in
+      NSNotificationCenter.default().bnd_notification(name: UITextViewTextDidChangeNotification, object: self).observe { [weak bnd_text] notification in
         if let textView = notification.object as? UITextView, bnd_text = bnd_text {
           updatingFromSelf = true
-          bnd_text.next(textView.text)
+          bnd_text.next(event: textView.text)
           updatingFromSelf = false
         }
-      }.disposeIn(bnd_bag)
+      }.disposeIn(disposeBag: bnd_bag)
       
       return bnd_text
     }
@@ -73,19 +73,19 @@ extension UITextView {
         }
       }
       
-      NSNotificationCenter.defaultCenter().bnd_notification(UITextViewTextDidChangeNotification, object: self).observe { [weak bnd_attributedText] notification in
+      NSNotificationCenter.default().bnd_notification(name: UITextViewTextDidChangeNotification, object: self).observe { [weak bnd_attributedText] notification in
         if let textView = notification.object as? UITextView, bnd_attributedText = bnd_attributedText {
           updatingFromSelf = true
-          bnd_attributedText.next(textView.attributedText)
+          bnd_attributedText.next(event: textView.attributedText)
           updatingFromSelf = false
         }
-      }.disposeIn(bnd_bag)
+      }.disposeIn(disposeBag: bnd_bag)
       
       return bnd_attributedText
     }
   }
   
   public var bnd_textColor: Observable<UIColor?> {
-    return bnd_associatedObservableForValueForKey("textColor")
+    return bnd_associatedObservableForValueForKey(key: "textColor")
   }
 }

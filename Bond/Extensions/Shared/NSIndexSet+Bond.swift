@@ -28,7 +28,7 @@ extension NSIndexSet {
   convenience init(set: Set<Int>) {
     let indexSet = NSMutableIndexSet()
     for index in set {
-      indexSet.addIndex(index)
+      indexSet.add(index)
     }
     self.init(indexSet: indexSet)
   }

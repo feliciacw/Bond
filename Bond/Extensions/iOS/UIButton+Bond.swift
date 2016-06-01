@@ -27,20 +27,20 @@ import UIKit
 extension UIButton {
   
   public var bnd_title: Observable<String?> {
-    return bnd_associatedObservableForValueForKey("title", initial: self.titleLabel?.text) { [weak self] title in
-      self?.setTitle(title, forState: UIControlState.Normal)
+    return bnd_associatedObservableForValueForKey(key: "title", initial: self.titleLabel?.text) { [weak self] title in
+      self?.setTitle(title, for: UIControlState.highlighted)
     }
   }
   
   public var bnd_tap: EventProducer<Void> {
-    return self.bnd_controlEvent.filter { $0 == UIControlEvents.TouchUpInside }.map { e in }
+    return self.bnd_controlEvent.filter { $0 == UIControlEvents.touchUpInside }.map { e in }
   }
   
   public var bnd_selected: Observable<Bool> {
-    return bnd_associatedObservableForValueForKey("selected")
+    return bnd_associatedObservableForValueForKey(key: "selected")
   }
   
   public var bnd_highlighted: Observable<Bool> {
-    return bnd_associatedObservableForValueForKey("highlighted")
+    return bnd_associatedObservableForValueForKey(key: "highlighted")
   }
 }

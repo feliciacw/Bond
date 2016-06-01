@@ -33,7 +33,7 @@ internal enum SimpleDiffOperation<T> {
 
 internal func simpleDiff<T where T: Hashable, T: Equatable>(before: Array<T>, after: Array<T>) -> [SimpleDiffOperation<T>] {
   
-  var oldIndexMap: [T: [Int]] = before.enumerate().reduce([:]) { dict, e in
+  var oldIndexMap: [T: [Int]] = before.enumerated().reduce([:]) { dict, e in
     var newDict = dict
     newDict[e.element] = (dict[e.element] ?? []) + [e.index]
     return newDict
@@ -44,7 +44,7 @@ internal func simpleDiff<T where T: Hashable, T: Equatable>(before: Array<T>, af
   var subStartNew = 0
   var subLength = 0
 
-  for (indexNew, element) in after.enumerate() {
+  for (indexNew, element) in after.enumerated() {
     var newOverlap = [Int: Int]()
     
     for indexOld in oldIndexMap[element] ?? [] {
@@ -65,9 +65,9 @@ internal func simpleDiff<T where T: Hashable, T: Equatable>(before: Array<T>, af
   if subLength == 0 {
     return (before.count > 0 ? [SimpleDiffOperation.Delete(elements: Array(before))] : []) + (after.count > 0 ? [SimpleDiffOperation.Insert(elements: Array(after))] : [])
   } else {
-    let beforeOperations = simpleDiff(Array(before[0..<subStartOld]), after: Array(after[0..<subStartNew]))
+    let beforeOperations = simpleDiff(before: Array(before[0..<subStartOld]), after: Array(after[0..<subStartNew]))
     let noopOperation = SimpleDiffOperation.Noop(elements: Array(after[subStartNew..<subStartNew+subLength]))
-    let afterOperations = simpleDiff(Array(before[subStartOld+subLength..<before.count]), after: Array(after[subStartNew+subLength..<after.count]))
+    let afterOperations = simpleDiff(before: Array(before[subStartOld+subLength..<before.count]), after: Array(after[subStartNew+subLength..<after.count]))
     return beforeOperations + [noopOperation] + afterOperations
   }
 }

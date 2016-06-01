@@ -27,6 +27,6 @@ import UIKit
 extension UIImageView {
   
   public var bnd_image: Observable<UIImage?> {
-    return bnd_associatedObservableForValueForKey("image")
+    return bnd_associatedObservableForValueForKey(key: "image")
   }
 }

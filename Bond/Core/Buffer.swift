@@ -65,7 +65,7 @@ public struct Buffer<EventType> {
     }
   }
   
-  public func replayTo(sink: EventType -> Void) {
+  public func replayTo(sink: (EventType) -> Void) {
     for event in buffer {
       sink(event)
     }

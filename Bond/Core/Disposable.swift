@@ -126,7 +126,7 @@ public final class CompositeDisposable: DisposableType {
 }
 
 public func += (left: CompositeDisposable, right: DisposableType) {
-  left.addDisposable(right)
+  left.addDisposable(disposable: right)
 }
 
 /// A disposable container that will dispose a collection of disposables upon deinit.
@@ -162,6 +162,6 @@ public final class DisposeBag: DisposableType {
 
 public extension DisposableType {
   public func disposeIn(disposeBag: DisposeBag) {
-    disposeBag.addDisposable(self)
+    disposeBag.addDisposable(disposable: self)
   }
 }

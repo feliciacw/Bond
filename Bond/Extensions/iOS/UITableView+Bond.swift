@@ -25,23 +25,23 @@
 import UIKit
 
 @objc public protocol BNDTableViewProxyDataSource {
-  optional func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String?
-  optional func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String?
-  optional func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool
-  optional func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool
-  optional func sectionIndexTitlesForTableView(tableView: UITableView) -> [String]?
-  optional func tableView(tableView: UITableView, sectionForSectionIndexTitle title: String, atIndex index: Int) -> Int
-  optional func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath)
-  optional func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath)
+  @objc optional func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String?
+  @objc optional func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String?
+  @objc optional func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool
+  @objc optional func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool
+  @objc optional func sectionIndexTitlesForTableView(tableView: UITableView) -> [String]?
+  @objc optional func tableView(tableView: UITableView, sectionForSectionIndexTitle title: String, atIndex index: Int) -> Int
+  @objc optional func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath)
+  @objc optional func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath)
   
   /// Override to specify reload or update
-  optional func shouldReloadInsteadOfUpdateTableView(tableView: UITableView) -> Bool
+  @objc optional func shouldReloadInsteadOfUpdateTableView(tableView: UITableView) -> Bool
   
   /// Override to specify custom row animation when row is being inserted, deleted or updated
-  optional func tableView(tableView: UITableView, animationForRowAtIndexPaths indexPaths: [NSIndexPath]) -> UITableViewRowAnimation
+  @objc optional func tableView(tableView: UITableView, animationForRowAtIndexPaths indexPaths: [NSIndexPath]) -> UITableViewRowAnimation
   
   /// Override to specify custom row animation when section is being inserted, deleted or updated
-  optional func tableView(tableView: UITableView, animationForRowInSections sections: Set<Int>) -> UITableViewRowAnimation
+  @objc optional func tableView(tableView: UITableView, animationForRowInSections sections: Set<Int>) -> UITableViewRowAnimation
 }
 
 private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
@@ -66,60 +66,60 @@ private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
     array.observeNew { [weak self] arrayEvent in
       guard let unwrappedSelf = self, let tableView = unwrappedSelf.tableView else { return }
 
-      if let reload = unwrappedSelf.proxyDataSource?.shouldReloadInsteadOfUpdateTableView?(tableView) where reload {
+      if let reload = unwrappedSelf.proxyDataSource?.shouldReloadInsteadOfUpdateTableView?(tableView: tableView) where reload {
         tableView.reloadData()
       } else {
         switch arrayEvent.operation {
         case .Batch(let operations):
           tableView.beginUpdates()
-          for diff in changeSetsFromBatchOperations(operations) {
-            BNDTableViewDataSource.applySectionUnitChangeSet(diff, tableView: tableView, dataSource: unwrappedSelf.proxyDataSource)
+          for diff in changeSetsFromBatchOperations(operations: operations) {
+            BNDTableViewDataSource.applySectionUnitChangeSet(changeSet: diff, tableView: tableView, dataSource: unwrappedSelf.proxyDataSource)
           }
           tableView.endUpdates()
         case .Reset:
           tableView.reloadData()
         default:
-          BNDTableViewDataSource.applySectionUnitChangeSet(arrayEvent.operation.changeSet(), tableView: tableView, dataSource: unwrappedSelf.proxyDataSource)
+          BNDTableViewDataSource.applySectionUnitChangeSet(changeSet: arrayEvent.operation.changeSet(), tableView: tableView, dataSource: unwrappedSelf.proxyDataSource)
         }
       }
       
       unwrappedSelf.setupPerSectionObservers()
-    }.disposeIn(bnd_bag)
+    }.disposeIn(disposeBag: bnd_bag)
   }
   
   private func setupPerSectionObservers() {
     sectionObservingDisposeBag.dispose()
 
-    for (sectionIndex, sectionObservableArray) in array.enumerate() {
+    for (sectionIndex, sectionObservableArray) in array.enumerated() {
       sectionObservableArray.observeNew { [weak tableView, weak self] arrayEvent in
         guard let tableView = tableView else { return }
-        if let reload = self?.proxyDataSource?.shouldReloadInsteadOfUpdateTableView?(tableView) where reload { tableView.reloadData(); return }
+        if let reload = self?.proxyDataSource?.shouldReloadInsteadOfUpdateTableView?(tableView: tableView) where reload { tableView.reloadData(); return }
         
         switch arrayEvent.operation {
         case .Batch(let operations):
           tableView.beginUpdates()
-          for diff in changeSetsFromBatchOperations(operations) {
-            BNDTableViewDataSource.applyRowUnitChangeSet(diff, tableView: tableView, sectionIndex: sectionIndex, dataSource: self?.proxyDataSource)
+          for diff in changeSetsFromBatchOperations(operations: operations) {
+            BNDTableViewDataSource.applyRowUnitChangeSet(changeSet: diff, tableView: tableView, sectionIndex: sectionIndex, dataSource: self?.proxyDataSource)
           }
           tableView.endUpdates()
         case .Reset:
           let indices = Set([sectionIndex])
-          tableView.reloadSections(NSIndexSet(index: sectionIndex), withRowAnimation: self?.proxyDataSource?.tableView?(tableView, animationForRowInSections: indices) ?? .Automatic)
+          tableView.reloadSections(NSIndexSet(index: sectionIndex), with: self?.proxyDataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
         default:
-          BNDTableViewDataSource.applyRowUnitChangeSet(arrayEvent.operation.changeSet(), tableView: tableView, sectionIndex: sectionIndex, dataSource: self?.proxyDataSource)
+          BNDTableViewDataSource.applyRowUnitChangeSet(changeSet: arrayEvent.operation.changeSet(), tableView: tableView, sectionIndex: sectionIndex, dataSource: self?.proxyDataSource)
         }
-      }.disposeIn(sectionObservingDisposeBag)
+      }.disposeIn(disposeBag: sectionObservingDisposeBag)
     }
   }
   
   private class func applySectionUnitChangeSet(changeSet: ObservableArrayEventChangeSet, tableView: UITableView, dataSource: BNDTableViewProxyDataSource?) {
     switch changeSet {
     case .Inserts(let indices):
-      tableView.insertSections(NSIndexSet(set: indices), withRowAnimation: dataSource?.tableView?(tableView, animationForRowInSections: indices) ?? .Automatic)
+      tableView.insertSections(NSIndexSet(set: indices), with: dataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
     case .Updates(let indices):
-      tableView.reloadSections(NSIndexSet(set: indices), withRowAnimation: dataSource?.tableView?(tableView, animationForRowInSections: indices) ?? .Automatic)
+      tableView.reloadSections(NSIndexSet(set: indices), with: dataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
     case .Deletes(let indices):
-      tableView.deleteSections(NSIndexSet(set: indices), withRowAnimation: dataSource?.tableView?(tableView, animationForRowInSections: indices) ?? .Automatic)
+      tableView.deleteSections(NSIndexSet(set: indices), with: dataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
     }
   }
   
@@ -127,64 +127,65 @@ private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
     switch changeSet {
     case .Inserts(let indices):
       let indexPaths = indices.map { NSIndexPath(forItem: $0, inSection: sectionIndex) }
-      tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: dataSource?.tableView?(tableView, animationForRowAtIndexPaths: indexPaths) ?? .Automatic)
+      tableView.insertRows(at: indexPaths, with: dataSource?.tableView?(tableView: tableView, animationForRowAtIndexPaths: indexPaths) ?? .automatic)
     case .Updates(let indices):
       let indexPaths = indices.map { NSIndexPath(forItem: $0, inSection: sectionIndex) }
-      tableView.reloadRowsAtIndexPaths(indexPaths, withRowAnimation: dataSource?.tableView?(tableView, animationForRowAtIndexPaths: indexPaths) ?? .Automatic)
+      tableView.reloadRows(at: indexPaths, with: dataSource?.tableView?(tableView: tableView, animationForRowAtIndexPaths: indexPaths) ?? .automatic)
     case .Deletes(let indices):
       let indexPaths = indices.map { NSIndexPath(forItem: $0, inSection: sectionIndex) }
-      tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: dataSource?.tableView?(tableView, animationForRowAtIndexPaths: indexPaths) ?? .Automatic)
+      tableView.deleteRows(at: indexPaths, with: dataSource?.tableView?(tableView: tableView, animationForRowAtIndexPaths: indexPaths) ?? .automatic)
     }
   }
   
   /// MARK - UITableViewDataSource
   
-  @objc func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+  @objc(numberOfSectionsInTableView:) func numberOfSections(in tableView: UITableView) -> Int {
     return array.count
   }
   
-  @objc func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+  @objc func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     return array[section].count
   }
   
-  @objc func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+  @objc func tableView(_ tableView: UITableView, cellForRowAt indexPath: NSIndexPath) -> UITableViewCell {
     return createCell(indexPath, array, tableView)
   }
   
-  @objc func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return proxyDataSource?.tableView?(tableView, titleForHeaderInSection: section)
+  @objc func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+    //return proxyDataSource?.tableView?(tableView, titleForHeaderInSection: section)
+    return proxyDataSource?.tableView?(tableView: tableView, titleForHeaderInSection: section)
   }
   
-  @objc func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-      return proxyDataSource?.tableView?(tableView, titleForFooterInSection: section)
+  @objc func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+      return proxyDataSource?.tableView?(tableView: tableView, titleForFooterInSection: section)
   }
   
-  @objc func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-    return proxyDataSource?.tableView?(tableView, canEditRowAtIndexPath: indexPath) ?? false
+  @objc func tableView(_ tableView: UITableView, canEditRowAt indexPath: NSIndexPath) -> Bool {
+    return proxyDataSource?.tableView?(tableView: tableView, canEditRowAtIndexPath: indexPath) ?? false
   }
   
-  @objc func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-    return proxyDataSource?.tableView?(tableView, canMoveRowAtIndexPath: indexPath) ?? false
+  @objc func tableView(_ tableView: UITableView, canMoveRowAt indexPath: NSIndexPath) -> Bool {
+    return proxyDataSource?.tableView?(tableView: tableView, canMoveRowAtIndexPath: indexPath) ?? false
   }
   
-  @objc func sectionIndexTitlesForTableView(tableView: UITableView) -> [String]? {
-    return proxyDataSource?.sectionIndexTitlesForTableView?(tableView)
+  @objc func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+    return proxyDataSource?.sectionIndexTitlesForTableView?(tableView: tableView)
   }
   
-  @objc func tableView(tableView: UITableView, sectionForSectionIndexTitle title: String, atIndex index: Int) -> Int {
-    if let section = proxyDataSource?.tableView?(tableView, sectionForSectionIndexTitle: title, atIndex: index) {
+  @objc func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
+    if let section = proxyDataSource?.tableView?(tableView: tableView, sectionForSectionIndexTitle: title, atIndex: index) {
       return section
     } else {
       fatalError("Dear Sir/Madam, your table view has asked for section for section index title \(title). Please provide a proxy data source object in bindTo() method that implements `tableView(tableView:sectionForSectionIndexTitle:atIndex:)` method!")
     }
   }
   
-  @objc func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-    proxyDataSource?.tableView?(tableView, commitEditingStyle: editingStyle, forRowAtIndexPath: indexPath)
+  @objc func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: NSIndexPath) {
+    proxyDataSource?.tableView?(tableView: tableView, commitEditingStyle: editingStyle, forRowAtIndexPath: indexPath)
   }
   
-  @objc func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
-    proxyDataSource?.tableView?(tableView, moveRowAtIndexPath: sourceIndexPath, toIndexPath: destinationIndexPath)
+  @objc func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: NSIndexPath, to destinationIndexPath: NSIndexPath) {
+    proxyDataSource?.tableView?(tableView: tableView, moveRowAtIndexPath: sourceIndexPath, toIndexPath: destinationIndexPath)
   }
 }
 
@@ -196,10 +197,10 @@ extension UITableView {
 
 public extension EventProducerType where
   EventType: ObservableArrayEventType,
-  EventType.ObservableArrayEventSequenceType.Generator.Element: EventProducerType,
-  EventType.ObservableArrayEventSequenceType.Generator.Element.EventType: ObservableArrayEventType {
+  EventType.ObservableArrayEventSequenceType.Iterator.Element: EventProducerType,
+  EventType.ObservableArrayEventSequenceType.Iterator.Element.EventType: ObservableArrayEventType {
   
-  private typealias ElementType = EventType.ObservableArrayEventSequenceType.Generator.Element.EventType.ObservableArrayEventSequenceType.Generator.Element
+  private typealias ElementType = EventType.ObservableArrayEventSequenceType.Iterator.Element.EventType.ObservableArrayEventSequenceType.Iterator.Element
   
   public func bindTo(tableView: UITableView, proxyDataSource: BNDTableViewProxyDataSource? = nil, createCell: (NSIndexPath, ObservableArray<ObservableArray<ElementType>>, UITableView) -> UITableViewCell) -> DisposableType {
     
