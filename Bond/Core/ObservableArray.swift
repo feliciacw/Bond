@@ -247,9 +247,14 @@ extension ObservableArray : RangeReplaceableCollection {
     self.init([] as [ElementType])
   }
 
-  public func replaceRange<C: Collection where C.Iterator.Element == ElementType>(subRange: Range<Int>, with newElements: C) {
-    replaceRange(subRange: subRange, with: Array(newElements))
+  public func replaceSubrange<C where C : Collection, C.Iterator.Element == ElementType>(_ subrange: Range<Int>, with newElements: C) {
+		
+    replaceRange(subRange: subrange, with: Array(newElements))
   }
+	
+//  public func replaceRange<C: Collection where C.Iterator.Element == ElementType>(subRange: Range<Int>, with newElements: C) {
+//    replaceRange(subRange: subRange, with: Array(newElements))
+//  }
 }
 
 extension ObservableArray : ArrayLiteralConvertible {

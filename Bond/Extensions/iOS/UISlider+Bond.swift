@@ -41,13 +41,13 @@ extension UISlider {
       
       var updatingFromSelf: Bool = false
       
-      bnd_value.observeNew { [weak self] value in
+      _ = bnd_value.observeNew { [weak self] value in
         if !updatingFromSelf {
           self?.value = value
         }
       }
       
-      self.bnd_controlEvent.filter { $0 == UIControlEvents.valueChanged }.observe { [weak self, weak bnd_value] event in
+      _ = self.bnd_controlEvent.filter { $0 == UIControlEvents.valueChanged }.observe { [weak self, weak bnd_value] event in
         guard let unwrappedSelf = self, let bnd_value = bnd_value else { return }
         updatingFromSelf = true
         bnd_value.next(event: unwrappedSelf.value)

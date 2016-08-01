@@ -30,6 +30,6 @@ extension NSIndexSet {
     for index in set {
       indexSet.add(index)
     }
-    self.init(indexSet: indexSet)
+    self.init(indexSet: indexSet as IndexSet)
   }
 }

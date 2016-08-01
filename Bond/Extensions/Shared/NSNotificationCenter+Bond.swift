@@ -24,15 +24,15 @@
 
 import Foundation
 
-extension NSNotificationCenter {
+extension NotificationCenter {
   
   public func bnd_notification(name: String, object: AnyObject?) -> EventProducer<NSNotification> {
     return EventProducer { sink in
-      let subscription = NSNotificationCenter.default().addObserver(forName: name, object: object, queue: nil, using: { notification in
+      let subscription = NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: name), object: object, queue: nil, using: { notification in
         sink(notification)
       })
       return BlockDisposable {
-        NSNotificationCenter.default().removeObserver(subscription)
+        NotificationCenter.default.removeObserver(subscription)
       }
     }
   }

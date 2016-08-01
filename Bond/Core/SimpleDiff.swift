@@ -35,7 +35,7 @@ internal func simpleDiff<T where T: Hashable, T: Equatable>(before: Array<T>, af
   
   var oldIndexMap: [T: [Int]] = before.enumerated().reduce([:]) { dict, e in
     var newDict = dict
-    newDict[e.element] = (dict[e.element] ?? []) + [e.index]
+    newDict[e.element] = (dict[e.element] ?? []) + [e.offset]
     return newDict
   }
   

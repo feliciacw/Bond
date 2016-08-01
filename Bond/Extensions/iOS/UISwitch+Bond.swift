@@ -41,13 +41,13 @@ extension UISwitch {
       
       var updatingFromSelf: Bool = false
       
-      bnd_on.observeNew { [weak self] on in
+      _ = bnd_on.observeNew { [weak self] on in
         if !updatingFromSelf {
           self?.isOn = on
         }
       }
       
-      self.bnd_controlEvent.filter { $0 == UIControlEvents.valueChanged }.observe { [weak self, weak bnd_on] event in
+      _ = self.bnd_controlEvent.filter { $0 == UIControlEvents.valueChanged }.observe { [weak self, weak bnd_on] event in
         guard let unwrappedSelf = self, let bnd_on = bnd_on else { return }
         updatingFromSelf = true
         bnd_on.next(event: unwrappedSelf.isOn)

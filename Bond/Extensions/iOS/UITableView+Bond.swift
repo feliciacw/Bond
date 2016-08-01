@@ -104,7 +104,7 @@ private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
           tableView.endUpdates()
         case .Reset:
           let indices = Set([sectionIndex])
-          tableView.reloadSections(NSIndexSet(index: sectionIndex), with: self?.proxyDataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
+          tableView.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet, with: self?.proxyDataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
         default:
           BNDTableViewDataSource.applyRowUnitChangeSet(changeSet: arrayEvent.operation.changeSet(), tableView: tableView, sectionIndex: sectionIndex, dataSource: self?.proxyDataSource)
         }
@@ -115,24 +115,24 @@ private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
   private class func applySectionUnitChangeSet(changeSet: ObservableArrayEventChangeSet, tableView: UITableView, dataSource: BNDTableViewProxyDataSource?) {
     switch changeSet {
     case .Inserts(let indices):
-      tableView.insertSections(NSIndexSet(set: indices), with: dataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
+      tableView.insertSections(NSIndexSet(set: indices) as IndexSet, with: dataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
     case .Updates(let indices):
-      tableView.reloadSections(NSIndexSet(set: indices), with: dataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
+      tableView.reloadSections(NSIndexSet(set: indices) as IndexSet, with: dataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
     case .Deletes(let indices):
-      tableView.deleteSections(NSIndexSet(set: indices), with: dataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
+      tableView.deleteSections(NSIndexSet(set: indices) as IndexSet, with: dataSource?.tableView?(tableView: tableView, animationForRowInSections: indices) ?? .automatic)
     }
   }
   
   private class func applyRowUnitChangeSet(changeSet: ObservableArrayEventChangeSet, tableView: UITableView, sectionIndex: Int, dataSource: BNDTableViewProxyDataSource?) {
     switch changeSet {
     case .Inserts(let indices):
-      let indexPaths = indices.map { NSIndexPath(forItem: $0, inSection: sectionIndex) }
+      let indexPaths = indices.map { IndexPath(item: $0, section: sectionIndex) }
       tableView.insertRows(at: indexPaths, with: dataSource?.tableView?(tableView: tableView, animationForRowAtIndexPaths: indexPaths) ?? .automatic)
     case .Updates(let indices):
-      let indexPaths = indices.map { NSIndexPath(forItem: $0, inSection: sectionIndex) }
+      let indexPaths = indices.map { IndexPath(item: $0, section: sectionIndex) }
       tableView.reloadRows(at: indexPaths, with: dataSource?.tableView?(tableView: tableView, animationForRowAtIndexPaths: indexPaths) ?? .automatic)
     case .Deletes(let indices):
-      let indexPaths = indices.map { NSIndexPath(forItem: $0, inSection: sectionIndex) }
+      let indexPaths = indices.map { IndexPath(item: $0, section: sectionIndex) }
       tableView.deleteRows(at: indexPaths, with: dataSource?.tableView?(tableView: tableView, animationForRowAtIndexPaths: indexPaths) ?? .automatic)
     }
   }
@@ -147,7 +147,7 @@ private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
     return array[section].count
   }
   
-  @objc func tableView(_ tableView: UITableView, cellForRowAt indexPath: NSIndexPath) -> UITableViewCell {
+  @objc func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     return createCell(indexPath, array, tableView)
   }
   
@@ -160,11 +160,11 @@ private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
       return proxyDataSource?.tableView?(tableView: tableView, titleForFooterInSection: section)
   }
   
-  @objc func tableView(_ tableView: UITableView, canEditRowAt indexPath: NSIndexPath) -> Bool {
+  @objc func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
     return proxyDataSource?.tableView?(tableView: tableView, canEditRowAtIndexPath: indexPath) ?? false
   }
   
-  @objc func tableView(_ tableView: UITableView, canMoveRowAt indexPath: NSIndexPath) -> Bool {
+  @objc func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
     return proxyDataSource?.tableView?(tableView: tableView, canMoveRowAtIndexPath: indexPath) ?? false
   }
   
@@ -180,11 +180,11 @@ private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
     }
   }
   
-  @objc func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: NSIndexPath) {
+  @objc func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
     proxyDataSource?.tableView?(tableView: tableView, commitEditingStyle: editingStyle, forRowAtIndexPath: indexPath)
   }
   
-  @objc func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: NSIndexPath, to destinationIndexPath: NSIndexPath) {
+  @objc func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
     proxyDataSource?.tableView?(tableView: tableView, moveRowAtIndexPath: sourceIndexPath, toIndexPath: destinationIndexPath)
   }
 }

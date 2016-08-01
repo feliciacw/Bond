@@ -66,10 +66,10 @@ public extension NSObject {
   deinit {
     object.removeObserver(self, forKeyPath: keyPath)
   }
-  
-  override dynamic func observeValue(forKeyPath keyPath: String?, of object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>?) {
+	
+  private override func observeValue(forKeyPath keyPath: String?, of object: AnyObject?, change: [NSKeyValueChangeKey : AnyObject]?, context: UnsafeMutablePointer<Void>?) {
     if context == &BNDKVOObserver.XXContext {
-      if let newValue: AnyObject? = change?[NSKeyValueChangeNewKey] {
+      if let newValue: AnyObject? = change?[NSKeyValueChangeKey.newKey] {
         listener(newValue)
       }
     }

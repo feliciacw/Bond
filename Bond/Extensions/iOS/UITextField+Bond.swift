@@ -40,13 +40,13 @@ extension UITextField {
       
       var updatingFromSelf: Bool = false
       
-      bnd_text.observeNew { [weak self] (text: String?) in
+      _ = bnd_text.observeNew { [weak self] (text: String?) in
         if !updatingFromSelf {
           self?.text = text
         }
       }
       
-      self.bnd_controlEvent.filter { $0 == UIControlEvents.editingChanged }.observe { [weak self, weak bnd_text] event in
+      _ = self.bnd_controlEvent.filter { $0 == UIControlEvents.editingChanged }.observe { [weak self, weak bnd_text] event in
         guard let unwrappedSelf = self, let bnd_text = bnd_text else { return }
         updatingFromSelf = true
         bnd_text.next(event: unwrappedSelf.text)
@@ -57,22 +57,22 @@ extension UITextField {
     }
   }
   
-  public var bnd_attributedText: Observable<NSAttributedString?> {
+  public var bnd_attributedText: Observable<AttributedString?> {
     if let bnd_attributedText: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.AttributedTextKey) {
-      return bnd_attributedText as! Observable<NSAttributedString?>
+      return bnd_attributedText as! Observable<AttributedString?>
     } else {
-      let bnd_attributedText = Observable<NSAttributedString?>(self.attributedText)
+      let bnd_attributedText = Observable<AttributedString?>(self.attributedText)
       objc_setAssociatedObject(self, &AssociatedKeys.AttributedTextKey, bnd_attributedText, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
       
       var updatingFromSelf: Bool = false
       
-      bnd_attributedText.observeNew { [weak self] (text: NSAttributedString?) in
+      _ = bnd_attributedText.observeNew { [weak self] (text: AttributedString?) in
         if !updatingFromSelf {
           self?.attributedText = text
         }
       }
       
-      self.bnd_controlEvent.filter { $0 == UIControlEvents.editingChanged }.observe { [weak self, weak bnd_attributedText] event in
+      _ = self.bnd_controlEvent.filter { $0 == UIControlEvents.editingChanged }.observe { [weak self, weak bnd_attributedText] event in
         guard let unwrappedSelf = self, let bnd_attributedText = bnd_attributedText else { return }
         updatingFromSelf = true
         bnd_attributedText.next(event: unwrappedSelf.attributedText)

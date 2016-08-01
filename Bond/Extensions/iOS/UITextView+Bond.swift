@@ -40,14 +40,14 @@ extension UITextView {
       
       var updatingFromSelf: Bool = false
       
-      bnd_text.observeNew { [weak self] (text: String?) in
+      _ = bnd_text.observeNew { [weak self] (text: String?) in
         if !updatingFromSelf {
           self?.text = text
         }
       }
       
-      NSNotificationCenter.default().bnd_notification(name: UITextViewTextDidChangeNotification, object: self).observe { [weak bnd_text] notification in
-        if let textView = notification.object as? UITextView, bnd_text = bnd_text {
+      NotificationCenter.default.bnd_notification(name: NSNotification.Name.UITextViewTextDidChange.rawValue, object: self).observe { [weak bnd_text] notification in
+        if let textView = notification.object as? UITextView, let bnd_text = bnd_text {
           updatingFromSelf = true
           bnd_text.next(event: textView.text)
           updatingFromSelf = false
@@ -58,23 +58,23 @@ extension UITextView {
     }
   }
   
-  public var bnd_attributedText: Observable<NSAttributedString?> {
+  public var bnd_attributedText: Observable<AttributedString?> {
     if let bnd_attributedText: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.AttributedTextKey) {
-      return bnd_attributedText as! Observable<NSAttributedString?>
+      return bnd_attributedText as! Observable<AttributedString?>
     } else {
-      let bnd_attributedText = Observable<NSAttributedString?>(self.attributedText)
+      let bnd_attributedText = Observable<AttributedString?>(self.attributedText)
       objc_setAssociatedObject(self, &AssociatedKeys.AttributedTextKey, bnd_attributedText, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
       
       var updatingFromSelf: Bool = false
       
-      bnd_attributedText.observeNew { [weak self] (text: NSAttributedString?) in
+      _ = bnd_attributedText.observeNew { [weak self] (text: AttributedString?) in
         if !updatingFromSelf {
           self?.attributedText = text
         }
       }
       
-      NSNotificationCenter.default().bnd_notification(name: UITextViewTextDidChangeNotification, object: self).observe { [weak bnd_attributedText] notification in
-        if let textView = notification.object as? UITextView, bnd_attributedText = bnd_attributedText {
+      NotificationCenter.default.bnd_notification(name: NSNotification.Name.UITextViewTextDidChange.rawValue, object: self).observe { [weak bnd_attributedText] notification in
+        if let textView = notification.object as? UITextView, let bnd_attributedText = bnd_attributedText {
           updatingFromSelf = true
           bnd_attributedText.next(event: textView.attributedText)
           updatingFromSelf = false

@@ -27,29 +27,28 @@ import Foundation
 
 /// A simple wrapper around GCD queue.
 public struct Queue {
+	
+//  public typealias TimeInterval = TimeInterval
+	
+  public static let Main = DispatchQueue.main
+  public static let Default = DispatchQueue.global(attributes: .qosDefault)
+  public static let Background = DispatchQueue.global(attributes: .qosBackground)
   
-  public typealias TimeInterval = NSTimeInterval
-  
-  public static let Main = Queue(queue: dispatch_get_main_queue());
-  public static let Default = Queue(queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
-  public static let Background = Queue(queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0))
-  
-  public private(set) var queue: dispatch_queue_t
+  public private(set) var queue: DispatchQueue
 
-  public init(queue: dispatch_queue_t = dispatch_queue_create("com.swift-bond.Bond.Queue", DISPATCH_QUEUE_SERIAL)) {
+  public init(queue: DispatchQueue = DispatchQueue(label: "com.swift-bond.Bond.Queue", attributes: .serial)) {
     self.queue = queue
   }
   
-  public func after(interval: NSTimeInterval, block: () -> Void) {
-    let dispatchTime = dispatch_time(DISPATCH_TIME_NOW, Int64(interval * NSTimeInterval(NSEC_PER_SEC)))
-    dispatch_after(dispatchTime, queue, block)
+  public func after(interval: TimeInterval, block: () -> Void) {
+	queue.after(when: DispatchTime.now() + interval, execute: block)
   }
   
   public func async(block: () -> Void) {
-    dispatch_async(queue, block)
+	queue.async(execute: block)
   }
 
   public func sync(block: () -> Void) {
-    dispatch_sync(queue, block)
+	queue.sync(execute: block)
   }
 }

@@ -41,13 +41,13 @@ extension UIDatePicker {
       
       var updatingFromSelf: Bool = false
       
-      bnd_date.observeNew { [weak self] (date: NSDate) in
+      _ = bnd_date.observeNew { [weak self] (date: NSDate) in
         if !updatingFromSelf {
-          self?.date = date
+          self?.date = date as Date
         }
       }
       
-      self.bnd_controlEvent.filter { $0 == UIControlEvents.valueChanged }.observe { [weak self, weak bnd_date] event in
+      _ = self.bnd_controlEvent.filter { $0 == UIControlEvents.valueChanged }.observe { [weak self, weak bnd_date] event in
         guard let unwrappedSelf = self, let bnd_date = bnd_date else { return }
         updatingFromSelf = true
         bnd_date.next(event: unwrappedSelf.date)

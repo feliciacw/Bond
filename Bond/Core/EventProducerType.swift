@@ -106,7 +106,7 @@ public extension EventProducerType {
   }
   
   /// Throttles event dispatching for a given number of seconds and then dispatches last event.
-  public func throttle(seconds: Queue.TimeInterval, queue: Queue) -> EventProducer<EventType> {
+  public func throttle(seconds: Double, queue: Queue) -> EventProducer<EventType> {
     return EventProducer(replayLength: replayLength) { sink in
       var shouldDispatch: Bool = true
       var lastEvent: EventType! = nil

@@ -207,7 +207,7 @@ public extension ObservableArrayOperation {
     case .Update(let elements, let fromIndex):
       return .Updates(Set(fromIndex..<fromIndex+elements.count))
     case .Remove(let range):
-      return .Deletes(Set(range))
+      return .Deletes(Set(range.lowerBound...range.upperBound))
     case .Reset:
       fallthrough
     case .Batch:
@@ -293,13 +293,13 @@ public func changeSetsFromBatchOperations<T>(operations: [ObservableArrayOperati
       // Inserts shift preceding inserts at higher indices
       inserts = Set(inserts.map { $0 >= fromIndex ? $0 + elements.count : $0 })
       
-      inserts.unionInPlace(fromIndex..<fromIndex+elements.count)
+      inserts.formUnion(Set(fromIndex..<fromIndex+elements.count))
       
     case .Update(let elements, let fromIndex):
       // Updates are always indexed in the index-space of the array before any operation is applied
 
       // Updates done to the elements that were inserted in this batch must be discared
-      var newUpdates = Array(Set(fromIndex..<fromIndex+elements.count).subtract(inserts))
+      var newUpdates = Array(Set(fromIndex..<fromIndex+elements.count).subtracting(inserts))
 
       // Any prior insertion or deletion shifts our indices
       for insert in inserts {
@@ -310,32 +310,32 @@ public func changeSetsFromBatchOperations<T>(operations: [ObservableArrayOperati
         newUpdates = newUpdates.map { $0 >= delete ? $0 + 1 : $0 }
       }
       
-      updates.unionInPlace(newUpdates)
+      updates.formUnion(Set(newUpdates))
       
     case .Remove(let range):
       // Deletes are always indexed in the index-space of the array before any operation is applied
       
-      let possibleNewDeletes = Set(range)
+      let possibleNewDeletes = Set(range.lowerBound...range.upperBound)
       
       // Elements that were inserted and then removed in this batch must be discared
-      let annihilated = inserts.intersect(possibleNewDeletes)
-      inserts.subtractInPlace(annihilated)
-      
-      let actualNewDeletes = possibleNewDeletes.subtract(annihilated)
+      let annihilated = inserts.intersection(possibleNewDeletes)
+      inserts.subtract(annihilated)
+	
+      let actualNewDeletes = possibleNewDeletes.subtracting(annihilated)
       
       // Deletes are shifted by preceding inserts and deletes at lower indices
       var correctionOffset = 0
-      for operation in operations.prefixUpTo(operationIndex) {
-        if range.startIndex >= operationStartIndex(operation) {
-          correctionOffset -= operationOffset(operation)
+      for operation in operations.prefix(upTo: operationIndex) {
+        if range.lowerBound >= operationStartIndex(operation: operation) {
+          correctionOffset -= operationOffset(operation: operation)
         }
       }
-      
-      let newDeletes = actualNewDeletes.map { $0 + correctionOffset }
-      deletes.unionInPlace(newDeletes)
+	
+      let newDeletes = Set(actualNewDeletes.map { $0 + correctionOffset })
+      deletes.formUnion(newDeletes)
       
       // Elements that were updated and then removed in this batch must be discared
-      updates.subtractInPlace(newDeletes)
+      updates.subtract(newDeletes)
 
       // Deletes shift preceding inserts at higher indices
       inserts = Set(inserts.map { $0 >= range.lowerBound ? $0 - range.count : $0 })

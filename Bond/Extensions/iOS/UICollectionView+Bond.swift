@@ -92,7 +92,7 @@ private class BNDCollectionViewDataSource<T>: NSObject, UICollectionViewDataSour
             }
           }, completion: nil)
         case .Reset:
-          collectionView.reloadSections(NSIndexSet(index: sectionIndex))
+          collectionView.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet)
         default:
           BNDCollectionViewDataSource.applyRowUnitChangeSet(changeSet: arrayEvent.operation.changeSet(), collectionView: collectionView, sectionIndex: sectionIndex)
         }
@@ -103,24 +103,24 @@ private class BNDCollectionViewDataSource<T>: NSObject, UICollectionViewDataSour
   private class func applySectionUnitChangeSet(changeSet: ObservableArrayEventChangeSet, collectionView: UICollectionView) {
     switch changeSet {
     case .Inserts(let indices):
-      collectionView.insertSections(NSIndexSet(set: indices))
+      collectionView.insertSections(NSIndexSet(set: indices) as IndexSet)
     case .Updates(let indices):
-      collectionView.reloadSections(NSIndexSet(set: indices))
+      collectionView.reloadSections(NSIndexSet(set: indices) as IndexSet)
     case .Deletes(let indices):
-      collectionView.deleteSections(NSIndexSet(set: indices))
+      collectionView.deleteSections(NSIndexSet(set: indices) as IndexSet)
     }
   }
   
   private class func applyRowUnitChangeSet(changeSet: ObservableArrayEventChangeSet, collectionView: UICollectionView, sectionIndex: Int) {
     switch changeSet {
     case .Inserts(let indices):
-      let indexPaths = indices.map { NSIndexPath(forItem: $0, inSection: sectionIndex) }
+      let indexPaths = indices.map { IndexPath(item: $0, section: sectionIndex) }
       collectionView.insertItems(at: indexPaths)
     case .Updates(let indices):
-      let indexPaths = indices.map { NSIndexPath(forItem: $0, inSection: sectionIndex) }
+      let indexPaths = indices.map { IndexPath(item: $0, section: sectionIndex) }
       collectionView.reloadItems(at: indexPaths)
     case .Deletes(let indices):
-      let indexPaths = indices.map { NSIndexPath(forItem: $0, inSection: sectionIndex) }
+      let indexPaths = indices.map { IndexPath(item: $0, section: sectionIndex) }
       collectionView.deleteItems(at: indexPaths)
     }
   }
@@ -135,11 +135,11 @@ private class BNDCollectionViewDataSource<T>: NSObject, UICollectionViewDataSour
     return array[section].count
   }
   
-  @objc func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: NSIndexPath) -> UICollectionViewCell {
+  @objc func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     return createCell(indexPath, array, collectionView)
   }
   
-  @objc func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: NSIndexPath) -> UICollectionReusableView {
+  @objc func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
     if let view = proxyDataSource?.collectionView?(collectionView: collectionView, viewForSupplementaryElementOfKind: kind, atIndexPath: indexPath) {
       return view
     } else {
@@ -147,11 +147,11 @@ private class BNDCollectionViewDataSource<T>: NSObject, UICollectionViewDataSour
     }
   }
   
-  @objc func collectionView(_ collectionView: UICollectionView, canMoveItemAt indexPath: NSIndexPath) -> Bool {
+  @objc func collectionView(_ collectionView: UICollectionView, canMoveItemAt indexPath: IndexPath) -> Bool {
     return proxyDataSource?.collectionView?(collectionView: collectionView, canMoveItemAtIndexPath: indexPath) ?? false
   }
   
-  @objc func collectionView(_ collectionView: UICollectionView, moveItemAt sourceIndexPath: NSIndexPath, to destinationIndexPath: NSIndexPath) {
+  @objc func collectionView(_ collectionView: UICollectionView, moveItemAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
     proxyDataSource?.collectionView?(collectionView: collectionView, moveItemAtIndexPath: sourceIndexPath, toIndexPath: destinationIndexPath)
   }
 }
