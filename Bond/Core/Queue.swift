@@ -31,17 +31,17 @@ public struct Queue {
 //  public typealias TimeInterval = TimeInterval
 	
   public static let Main = DispatchQueue.main
-  public static let Default = DispatchQueue.global(attributes: .qosDefault)
-  public static let Background = DispatchQueue.global(attributes: .qosBackground)
+  public static let Default = DispatchQueue.global(qos: .default)
+  public static let Background = DispatchQueue.global(qos: .background)
   
   public private(set) var queue: DispatchQueue
 
-  public init(queue: DispatchQueue = DispatchQueue(label: "com.swift-bond.Bond.Queue", attributes: .serial)) {
+  public init(queue: DispatchQueue = DispatchQueue(label: "com.swift-bond.Bond.Queue", qos: .default, attributes: DispatchQueue.Attributes.concurrent, autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency.inherit)) {
     self.queue = queue
   }
   
   public func after(interval: TimeInterval, block: () -> Void) {
-	queue.after(when: DispatchTime.now() + interval, execute: block)
+	queue.asyncAfter(deadline: DispatchTime.now() + interval, execute: block)
   }
   
   public func async(block: () -> Void) {

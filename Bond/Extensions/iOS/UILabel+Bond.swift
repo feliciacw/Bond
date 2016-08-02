@@ -30,7 +30,7 @@ extension UILabel {
     return bnd_associatedObservableForValueForKey(key: "text")
   }
   
-  public var bnd_attributedText: Observable<AttributedString?> {
+  public var bnd_attributedText: Observable<NSAttributedString?> {
     return bnd_associatedObservableForValueForKey(key: "attributedText")
   }
   

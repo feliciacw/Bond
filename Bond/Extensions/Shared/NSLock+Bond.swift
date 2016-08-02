@@ -24,14 +24,14 @@
 
 import Foundation
 
-public extension Lock {
+public extension NSLock {
   public convenience init(name: String) {
     self.init()
     self.name = name
   }
 }
 
-public extension RecursiveLock {
+public extension NSRecursiveLock {
   public convenience init(name: String) {
     self.init()
     self.name = name
