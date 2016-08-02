@@ -36,7 +36,7 @@ public struct Queue {
   
   public private(set) var queue: DispatchQueue
 
-  public init(queue: DispatchQueue = DispatchQueue(label: "com.swift-bond.Bond.Queue", qos: .default, attributes: DispatchQueue.Attributes.concurrent, autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency.inherit)) {
+  public init(queue: DispatchQueue = DispatchQueue(label: "com.swift-bond.Bond.Queue")) {
     self.queue = queue
   }
   
