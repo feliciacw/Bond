@@ -66,7 +66,7 @@ private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
     array.observeNew { [weak self] arrayEvent in
       guard let unwrappedSelf = self, let tableView = unwrappedSelf.tableView else { return }
 
-      if let reload = unwrappedSelf.proxyDataSource?.shouldReloadInsteadOfUpdateTableView?(tableView: tableView) where reload {
+      if let reload = unwrappedSelf.proxyDataSource?.shouldReloadInsteadOfUpdateTableView?(tableView: tableView) , reload {
         tableView.reloadData()
       } else {
         switch arrayEvent.operation {
@@ -93,7 +93,7 @@ private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
     for (sectionIndex, sectionObservableArray) in array.enumerated() {
       sectionObservableArray.observeNew { [weak tableView, weak self] arrayEvent in
         guard let tableView = tableView else { return }
-        if let reload = self?.proxyDataSource?.shouldReloadInsteadOfUpdateTableView?(tableView: tableView) where reload { tableView.reloadData(); return }
+        if let reload = self?.proxyDataSource?.shouldReloadInsteadOfUpdateTableView?(tableView: tableView) , reload { tableView.reloadData(); return }
         
         switch arrayEvent.operation {
         case .Batch(let operations):

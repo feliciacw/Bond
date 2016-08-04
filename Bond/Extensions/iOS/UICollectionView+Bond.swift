@@ -55,7 +55,7 @@ private class BNDCollectionViewDataSource<T>: NSObject, UICollectionViewDataSour
     array.observeNew { [weak self] arrayEvent in
       guard let unwrappedSelf = self, let collectionView = unwrappedSelf.collectionView else { return }
 
-      if let reload = unwrappedSelf.proxyDataSource?.shouldReloadInsteadOfUpdateCollectionView?(collectionView: collectionView) where reload {
+      if let reload = unwrappedSelf.proxyDataSource?.shouldReloadInsteadOfUpdateCollectionView?(collectionView: collectionView) , reload {
         collectionView.reloadData()
       } else {
         switch arrayEvent.operation {
@@ -82,7 +82,7 @@ private class BNDCollectionViewDataSource<T>: NSObject, UICollectionViewDataSour
     for (sectionIndex, sectionObservableArray) in array.enumerated() {
       sectionObservableArray.observeNew { [weak collectionView, weak proxyDataSource] arrayEvent in
         guard let collectionView = collectionView else { return }
-        if let reload = proxyDataSource?.shouldReloadInsteadOfUpdateCollectionView?(collectionView: collectionView) where reload { collectionView.reloadData(); return }
+        if let reload = proxyDataSource?.shouldReloadInsteadOfUpdateCollectionView?(collectionView: collectionView) , reload { collectionView.reloadData(); return }
 
         switch arrayEvent.operation {
         case .Batch(let operations):
