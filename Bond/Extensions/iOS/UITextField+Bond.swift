@@ -57,16 +57,16 @@ extension UITextField {
     }
   }
   
-  public var bnd_attributedText: Observable<NSAttributedString?> {
+  public var bnd_attributedText: Observable<AttributedString?> {
     if let bnd_attributedText: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.AttributedTextKey) {
-      return bnd_attributedText as! Observable<NSAttributedString?>
+      return bnd_attributedText as! Observable<AttributedString?>
     } else {
-      let bnd_attributedText = Observable<NSAttributedString?>(self.attributedText)
+      let bnd_attributedText = Observable<AttributedString?>(self.attributedText)
       objc_setAssociatedObject(self, &AssociatedKeys.AttributedTextKey, bnd_attributedText, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
       
       var updatingFromSelf: Bool = false
       
-      _ = bnd_attributedText.observeNew { [weak self] (text: NSAttributedString?) in
+      _ = bnd_attributedText.observeNew { [weak self] (text: AttributedString?) in
         if !updatingFromSelf {
           self?.attributedText = text
         }

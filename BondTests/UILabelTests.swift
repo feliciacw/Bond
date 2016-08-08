@@ -27,7 +27,7 @@ class UILabelTests: XCTestCase {
   }
     
   func testUILabelAttributedTextBond() {
-    let observable = Observable<NSAttributedString>(NSAttributedString(string: "b"))
+    let observable = Observable<AttributedString>(AttributedString(string: "b"))
     let label = UILabel()
         
     label.text = "a"
@@ -36,7 +36,7 @@ class UILabelTests: XCTestCase {
     observable.bindTo(label.bnd_attributedText)
     XCTAssert(label.attributedText!.string == "b", "Value after binding")
         
-    observable.value = NSAttributedString(string: "c")
+    observable.value = AttributedString(string: "c")
     XCTAssert(label.attributedText!.string == "c", "Value after observable change")
   }
     
@@ -44,13 +44,13 @@ class UILabelTests: XCTestCase {
     let observable = Observable<UIColor>(UIColor.blackColor())
     let label = UILabel()
         
-    label.textColor = UIColor.redColor()
-    XCTAssert(label.textColor == UIColor.redColor(), "Initial Value")
+    label.textColor = UIColor.red()
+    XCTAssert(label.textColor == UIColor.red(), "Initial Value")
         
     observable.bindTo(label.bnd_textColor)
-    XCTAssert(label.textColor == UIColor.blackColor(), "Value after binding")
+    XCTAssert(label.textColor == UIColor.black(), "Value after binding")
         
     observable.value = UIColor.blueColor()
-    XCTAssert(label.textColor == UIColor.blueColor(), "Value after observable change")
+    XCTAssert(label.textColor == UIColor.blue(), "Value after observable change")
   }
 }

@@ -16,14 +16,14 @@ class UIKitTests: XCTestCase {
     let observable = Observable<Bool>(false)
     let view = UIView()
     
-    view.hidden = true
-    XCTAssert(view.hidden == true, "Initial value")
+    view.isHidden = true
+    XCTAssert(view.isHidden == true, "Initial value")
     
     observable.bindTo(view.bnd_hidden)
-    XCTAssert(view.hidden == false, "Value after binding")
+    XCTAssert(view.isHidden == false, "Value after binding")
     
     observable.value = true
-    XCTAssert(view.hidden == true, "Value after observable change")
+    XCTAssert(view.isHidden == true, "Value after observable change")
   }
   
   func testUIViewAlphaBond() {
@@ -44,14 +44,14 @@ class UIKitTests: XCTestCase {
     let observable = Observable<UIColor>(UIColor.blackColor())
     let view = UIView()
     
-    view.backgroundColor = UIColor.redColor()
-    XCTAssert(view.backgroundColor == UIColor.redColor(), "Initial value")
+    view.backgroundColor = UIColor.red()
+    XCTAssert(view.backgroundColor == UIColor.red(), "Initial value")
     
     observable.bindTo(view.bnd_backgroundColor)
-    XCTAssert(view.backgroundColor == UIColor.blackColor(), "Value after binding")
+    XCTAssert(view.backgroundColor == UIColor.black(), "Value after binding")
     
     observable.value = UIColor.blueColor()
-    XCTAssert(view.backgroundColor == UIColor.blueColor(), "Value after observable change")
+    XCTAssert(view.backgroundColor == UIColor.blue(), "Value after observable change")
   }
   
   func testUILabelBond() {
@@ -69,7 +69,7 @@ class UIKitTests: XCTestCase {
   }
   
   func testUILabelAttributedTextBond() {
-    let observable = Observable<NSAttributedString>(NSAttributedString(string: "b"))
+    let observable = Observable<AttributedString>(AttributedString(string: "b"))
     let label = UILabel()
     
     label.text = "a"
@@ -78,7 +78,7 @@ class UIKitTests: XCTestCase {
     observable.bindTo(label.bnd_attributedText)
     XCTAssert(label.attributedText!.string == "b", "Value after binding")
     
-    observable.value = NSAttributedString(string: "c")
+    observable.value = AttributedString(string: "c")
     XCTAssert(label.attributedText!.string == "c", "Value after observable change")
   }
 
@@ -115,14 +115,14 @@ class UIKitTests: XCTestCase {
     let observable = Observable<Bool>(false)
     let button = UIButton()
     
-    button.enabled = true
-    XCTAssert(button.enabled == true, "Initial value")
+    button.isEnabled = true
+    XCTAssert(button.isEnabled == true, "Initial value")
     
     observable.bindTo(button.bnd_enabled)
-    XCTAssert(button.enabled == false, "Value after binding")
+    XCTAssert(button.isEnabled == false, "Value after binding")
     
     observable.value = true
-    XCTAssert(button.enabled == true, "Value after observable change")
+    XCTAssert(button.isEnabled == true, "Value after observable change")
   }
   
   func testUIButtonTitleBond() {
@@ -143,14 +143,14 @@ class UIKitTests: XCTestCase {
     let observable = Observable<Bool>(false)
     let barItem = UIBarButtonItem()
     
-    barItem.enabled = true
-    XCTAssert(barItem.enabled == true, "Initial value")
+    barItem.isEnabled = true
+    XCTAssert(barItem.isEnabled == true, "Initial value")
     
     observable.bindTo(barItem.bnd_enabled)
-    XCTAssert(barItem.enabled == false, "Value after binding")
+    XCTAssert(barItem.isEnabled == false, "Value after binding")
     
     observable.value = true
-    XCTAssert(barItem.enabled == true, "Value after observable change")
+    XCTAssert(barItem.isEnabled == true, "Value after observable change")
   }
   
   func testUIBarItemTitleBond() {

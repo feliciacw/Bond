@@ -16,13 +16,13 @@ class UINavigationBarTests : XCTestCase {
     let observable = Observable<UIColor>(UIColor.blackColor())
     let bar = UINavigationBar()
 
-    bar.barTintColor = UIColor.redColor()
-    XCTAssert(bar.barTintColor == UIColor.redColor(), "Initial value")
+    bar.barTintColor = UIColor.red()
+    XCTAssert(bar.barTintColor == UIColor.red(), "Initial value")
 
     observable.bindTo(bar.bnd_barTintColor)
-    XCTAssert(bar.barTintColor == UIColor.blackColor(), "Value after binding")
+    XCTAssert(bar.barTintColor == UIColor.black(), "Value after binding")
 
     observable.value = UIColor.blueColor()
-    XCTAssert(bar.barTintColor == UIColor.blueColor(), "Value after observable change")
+    XCTAssert(bar.barTintColor == UIColor.blue(), "Value after observable change")
   }
 }

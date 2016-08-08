@@ -24,14 +24,14 @@ class CALayerTests: XCTestCase {
     let driver = Observable<CGColor>(Color.whiteColor().CGColor)
     let layer = CALayer()
 
-    layer.backgroundColor = Color.redColor().CGColor
-    XCTAssert(CGColorEqualToColor(layer.backgroundColor, Color.redColor().CGColor), "Initial value")
+    layer.backgroundColor = Color.red().cgColor
+    XCTAssert((layer.backgroundColor?.equalTo(Color.red().cgColor))!, "Initial value")
     
     driver.bindTo(layer.bnd_backgroundColor)
-    XCTAssert(CGColorEqualToColor(layer.backgroundColor, Color.whiteColor().CGColor), "Value after binding")
+    XCTAssert((layer.backgroundColor?.equalTo(Color.white().cgColor))!, "Value after binding")
     
     driver.value = Color.greenColor().CGColor
-    XCTAssert(CGColorEqualToColor(layer.backgroundColor, Color.greenColor().CGColor), "Value after dynamic change")
+    XCTAssert((layer.backgroundColor?.equalTo(Color.green().cgColor))!, "Value after dynamic change")
   }
   
 }

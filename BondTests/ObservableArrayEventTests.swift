@@ -10,13 +10,13 @@ import XCTest
 @testable import Bond
 
 enum Letters {
-  case A
-  case B
-  case C
-  case D
-  case X
-  case Y
-  case Z
+  case a
+  case b
+  case c
+  case d
+  case x
+  case y
+  case z
 }
 
 func ==(lsh: [ObservableArrayEventChangeSet], rhs: [ObservableArrayEventChangeSet]) -> Bool {

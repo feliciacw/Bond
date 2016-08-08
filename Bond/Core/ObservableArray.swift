@@ -257,7 +257,7 @@ extension ObservableArray : RangeReplaceableCollection {
 //  }
 }
 
-extension ObservableArray : ExpressibleByArrayLiteral {
+extension ObservableArray : ArrayLiteralConvertible {
 
   public typealias Element = ElementType
 
