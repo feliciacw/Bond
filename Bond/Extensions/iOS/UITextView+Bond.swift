@@ -52,7 +52,7 @@ extension UITextView {
           bnd_text.next(event: textView.text)
           updatingFromSelf = false
         }
-      }.disposeIn(disposeBag: bnd_bag)
+      }.disposeIn(bnd_bag)
       
       return bnd_text
     }
@@ -79,7 +79,7 @@ extension UITextView {
           bnd_attributedText.next(event: textView.attributedText)
           updatingFromSelf = false
         }
-      }.disposeIn(disposeBag: bnd_bag)
+      }.disposeIn(bnd_bag)
       
       return bnd_attributedText
     }

@@ -161,7 +161,7 @@ public final class DisposeBag: DisposableType {
 }
 
 public extension DisposableType {
-  public func disposeIn(disposeBag: DisposeBag) {
+  public func disposeIn(_ disposeBag: DisposeBag) {
     disposeBag.addDisposable(disposable: self)
   }
 }

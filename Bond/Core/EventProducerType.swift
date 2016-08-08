@@ -41,7 +41,7 @@ public extension EventProducerType {
   
   /// Registers the observer that will receive only events generated after registering.
   /// A better performing verion of observable.skip(observable.replyLength).observe().
-  public func observeNew(observer: (EventType) -> Void) -> DisposableType {
+  public func observeNew(_ observer: (EventType) -> Void) -> DisposableType {
     var skip: Int = replayLength
     return observe { value in
       if skip > 0 {
@@ -289,58 +289,58 @@ extension EventProducerType where EventType: OptionalType, EventType.WrappedType
   }
 }
 
-public func combineLatest<A: EventProducerType, B: EventProducerType>(a: A, _ b: B) -> EventProducer<(A.EventType, B.EventType)> {
+public func combineLatest<A: EventProducerType, B: EventProducerType>(_ a: A, _ b: B) -> EventProducer<(A.EventType, B.EventType)> {
   return a.combineLatestWith(other: b)
 }
 
-public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType>(a: A, _ b: B, _ c: C) -> EventProducer<(A.EventType, B.EventType, C.EventType)> {
-  return combineLatest(a: a, b).combineLatestWith(other: c).map { ($0.0, $0.1, $1) }
+public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType>(_ a: A, _ b: B, _ c: C) -> EventProducer<(A.EventType, B.EventType, C.EventType)> {
+  return combineLatest(a, b).combineLatestWith(other: c).map { ($0.0, $0.1, $1) }
 }
 
-public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType>(a: A, _ b: B, _ c: C, _ d: D) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType)> {
-  return combineLatest(a: a, b, c).combineLatestWith(other: d).map { ($0.0, $0.1, $0.2, $1) }
+public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType>(_ a: A, _ b: B, _ c: C, _ d: D) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType)> {
+  return combineLatest(a, b, c).combineLatestWith(other: d).map { ($0.0, $0.1, $0.2, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType>
-  (a: A, _ b: B, _ c: C, _ d: D, _ e: E) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType)>
+  (_ a: A, _ b: B, _ c: C, _ d: D, _ e: E) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType)>
 {
-  return combineLatest(a: a, b, c, d).combineLatestWith(other: e).map { ($0.0, $0.1, $0.2, $0.3, $1) }
+  return combineLatest(a, b, c, d).combineLatestWith(other: e).map { ($0.0, $0.1, $0.2, $0.3, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType>
-  ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType)>
+  (_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType)>
 {
-  return combineLatest(a: a, b, c, d, e).combineLatestWith(other: f).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $1) }
+  return combineLatest(a, b, c, d, e).combineLatestWith(other: f).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType, G: EventProducerType>
-  ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType)>
+  (_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType)>
 {
-  return combineLatest(a: a, b, c, d, e, f).combineLatestWith(other: g).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $1) }
+  return combineLatest(a, b, c, d, e, f).combineLatestWith(other: g).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType, G: EventProducerType, H: EventProducerType>
-  ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType)>
+  (_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType)>
 {
-  return combineLatest(a: a, b, c, d, e, f, g).combineLatestWith(other: h).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $1) }
+  return combineLatest(a, b, c, d, e, f, g).combineLatestWith(other: h).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType, G: EventProducerType, H: EventProducerType, I: EventProducerType>
-  ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType, I.EventType)>
+  (_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType, I.EventType)>
 {
-  return combineLatest(a: a, b, c, d, e, f, g, h).combineLatestWith(other: i).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $1) }
+  return combineLatest(a, b, c, d, e, f, g, h).combineLatestWith(other: i).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType, G: EventProducerType, H: EventProducerType, I: EventProducerType, J: EventProducerType>
-  ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I, _ j: J) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType, I.EventType, J.EventType)>
+  (_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I, _ j: J) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType, I.EventType, J.EventType)>
 {
-  return combineLatest(a: a, b, c, d, e, f, g, h, i).combineLatestWith(other: j).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $0.8, $1) }
+  return combineLatest(a, b, c, d, e, f, g, h, i).combineLatestWith(other: j).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $0.8, $1) }
 }
 
 public func combineLatest<A: EventProducerType, B: EventProducerType, C: EventProducerType, D: EventProducerType, E: EventProducerType, F: EventProducerType, G: EventProducerType, H: EventProducerType, I: EventProducerType, J: EventProducerType, K: EventProducerType>
-  ( a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I, _ j: J, _ k: K) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType, I.EventType, J.EventType, K.EventType)>
+  (_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I, _ j: J, _ k: K) -> EventProducer<(A.EventType, B.EventType, C.EventType, D.EventType, E.EventType, F.EventType, G.EventType, H.EventType, I.EventType, J.EventType, K.EventType)>
 {
-  return combineLatest(a: a, b, c, d, e, f, g, h, i, j).combineLatestWith(other: k).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $0.8, $0.9, $1) }
+  return combineLatest(a, b, c, d, e, f, g, h, i, j).combineLatestWith(other: k).map { ($0.0, $0.1, $0.2, $0.3, $0.4, $0.5, $0.6, $0.7, $0.8, $0.9, $1) }
 }
 
 public func merge<S: Sequence where S.Iterator.Element: EventProducerType>(sequence: S) -> EventProducer<S.Iterator.Element.EventType> {
