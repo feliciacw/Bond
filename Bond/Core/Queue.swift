@@ -31,8 +31,8 @@ public struct Queue {
 //  public typealias TimeInterval = TimeInterval
 	
   public static let Main = DispatchQueue.main
-  public static let Default = DispatchQueue.global(attributes: .qosDefault)
-  public static let Background = DispatchQueue.global(attributes: .qosBackground)
+  public static let Default = DispatchQueue.global(qos: .default)
+  public static let Background = DispatchQueue.global(qos: .background)
   
   public private(set) var queue: DispatchQueue
 
@@ -41,7 +41,7 @@ public struct Queue {
   }
   
   public func after(interval: TimeInterval, block: () -> Void) {
-    queue.after(when: DispatchTime.now() + interval, execute: block)
+    queue.asyncAfter(deadline: DispatchTime.now() + interval, execute: block)
   }
   
   public func async(block: () -> Void) {

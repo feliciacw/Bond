@@ -43,7 +43,7 @@ public final class BlockDisposable: DisposableType {
   }
   
   private var handler: (() -> Void)?
-  private let lock = RecursiveLock(name: "com.swift-bond.Bond.BlockDisposable")
+  private let lock = NSRecursiveLock(name: "com.swift-bond.Bond.BlockDisposable")
   
   public init(_ handler: () -> Void) {
     self.handler = handler
@@ -61,7 +61,7 @@ public final class BlockDisposable: DisposableType {
 public final class SerialDisposable: DisposableType {
   
   public private(set) var isDisposed: Bool = false
-  private let lock = RecursiveLock(name: "com.swift-bond.Bond.SerialDisposable")
+  private let lock = NSRecursiveLock(name: "com.swift-bond.Bond.SerialDisposable")
   
   /// Will dispose other disposable immediately if self is already disposed.
   public var otherDisposable: DisposableType? {
@@ -93,7 +93,7 @@ public final class CompositeDisposable: DisposableType {
   
   public private(set) var isDisposed: Bool = false
   private var disposables: [DisposableType] = []
-  private let lock = RecursiveLock(name: "com.swift-bond.Bond.CompositeDisposable")
+  private let lock = NSRecursiveLock(name: "com.swift-bond.Bond.CompositeDisposable")
   
   public convenience init() {
     self.init([])
