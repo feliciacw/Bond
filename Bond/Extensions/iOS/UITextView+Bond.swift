@@ -46,7 +46,7 @@ extension UITextView {
         }
       }
       
-      NotificationCenter.default.bnd_notification(name: NSNotification.Name.UITextViewTextDidChange.rawValue, object: self).observe { [weak bnd_text] notification in
+      NotificationCenter.default.bnd_notification(NSNotification.Name.UITextViewTextDidChange.rawValue, object: self).observe { [weak bnd_text] notification in
         if let textView = notification.object as? UITextView, let bnd_text = bnd_text {
           updatingFromSelf = true
           bnd_text.next(event: textView.text)
@@ -73,7 +73,7 @@ extension UITextView {
         }
       }
       
-      NotificationCenter.default.bnd_notification(name: NSNotification.Name.UITextViewTextDidChange.rawValue, object: self).observe { [weak bnd_attributedText] notification in
+      NotificationCenter.default.bnd_notification(NSNotification.Name.UITextViewTextDidChange.rawValue, object: self).observe { [weak bnd_attributedText] notification in
         if let textView = notification.object as? UITextView, let bnd_attributedText = bnd_attributedText {
           updatingFromSelf = true
           bnd_attributedText.next(event: textView.attributedText)

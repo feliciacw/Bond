@@ -26,7 +26,7 @@ import Foundation
 
 extension NotificationCenter {
   
-  public func bnd_notification(name: String, object: AnyObject?) -> EventProducer<NSNotification> {
+  public func bnd_notification(_ name: String, object: AnyObject?) -> EventProducer<Notification> {
     return EventProducer { sink in
       let subscription = NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: name), object: object, queue: nil, using: { notification in
         sink(notification)
