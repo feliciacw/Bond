@@ -347,7 +347,7 @@ public extension EventProducerType where EventType: ObservableArrayEventType {
     observe{ capturedArray = Array($0.sequence) }.dispose()
     
     let array = ObservableArray<ElementType>(capturedArray)
-    array.deinitDisposable += skip(count: replayLength).observe { [weak array] event in
+    array.deinitDisposable += skip(replayLength).observe { [weak array] event in
       array?.applyOperation(operation: event.operation)
       return
     }

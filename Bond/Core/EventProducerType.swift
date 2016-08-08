@@ -34,7 +34,7 @@ public protocol EventProducerType {
   var replayLength: Int { get }
   
   /// Registers the given observer and returns a disposable that can cancel observing.
-  func observe(observer: (EventType) -> Void) -> DisposableType
+  func observe(_ observer: (EventType) -> Void) -> DisposableType
 }
 
 public extension EventProducerType {
@@ -54,7 +54,7 @@ public extension EventProducerType {
   
   /// Establishes a one-way binding between the source and the bindable's sink
   /// and returns a disposable that can cancel observing.
-  public func bindTo<B: BindableType where B.Element == EventType>(bindable: B) -> DisposableType {
+  public func bindTo<B: BindableType where B.Element == EventType>(_ bindable: B) -> DisposableType {
     let disposable = SerialDisposable(otherDisposable: nil)
     let sink = bindable.sink(disconnectDisposable: disposable)
     disposable.otherDisposable = observe { value in
@@ -65,7 +65,7 @@ public extension EventProducerType {
   
   /// Establishes a one-way binding between the source and the bindable's sink
   /// and returns a disposable that can cancel observing.
-  public func bindTo<B: BindableType where B.Element == Optional<EventType>>(bindable: B) -> DisposableType {
+  public func bindTo<B: BindableType where B.Element == Optional<EventType>>(_ bindable: B) -> DisposableType {
     let disposable = SerialDisposable(otherDisposable: nil)
     let sink = bindable.sink(disconnectDisposable: disposable)
     disposable.otherDisposable = observe { value in
@@ -75,7 +75,7 @@ public extension EventProducerType {
   }
   
   /// Transformes each event by the given `transform` function.
-  public func map<T>(transform: (EventType) -> T) -> EventProducer<T> {
+  public func map<T>(_ transform: (EventType) -> T) -> EventProducer<T> {
     return EventProducer(replayLength: replayLength) { sink in
       return observe { event in
         sink(transform(event))
@@ -84,7 +84,7 @@ public extension EventProducerType {
   }
   
   /// Forwards only events for which the given closure returns 'true'.
-  public func filter(includeEvent: (EventType) -> Bool) -> EventProducer<EventType> {
+  public func filter(_ includeEvent: (EventType) -> Bool) -> EventProducer<EventType> {
     return EventProducer(replayLength: replayLength) { sink in
       return observe { event in
         if includeEvent(event) {
@@ -125,7 +125,7 @@ public extension EventProducerType {
   }
   
   /// Ignores first `count` events and forwards any subsequent.
-  public func skip(count: Int) -> EventProducer<EventType> {
+  public func skip(_ count: Int) -> EventProducer<EventType> {
     var internalCount = count
     return EventProducer(replayLength: max(replayLength - internalCount, 0)) { sink in
       return observe { event in
@@ -178,9 +178,9 @@ public extension EventProducerType {
   public func flatMap<U: EventProducerType>(strategy: ObservableFlatMapStrategy, transform: (EventType) -> U) -> EventProducer<U.EventType> {
     switch strategy {
     case .Latest:
-      return map(transform: transform).switchToLatest()
+      return map(transform).switchToLatest()
     case .Merge:
-      return map(transform: transform).merge()
+      return map(transform).merge()
     }
   }
   
@@ -200,8 +200,8 @@ public extension EventProducerType where Self: BindableType {
   /// Establishes a one-way binding between the source and the bindable's sink
   /// and returns a disposable that can cancel observing.
   public func bidirectionalBindTo<B: BindableType where B: EventProducerType, B.EventType == Element, B.Element == EventType>(bindable: B) -> DisposableType {
-    let d1 = bindTo(bindable: bindable)
-    let d2 = bindable.bindTo(bindable: self)
+    let d1 = bindTo(bindable)
+    let d2 = bindable.bindTo(self)
     return CompositeDisposable([d1, d2])
   }
 }
@@ -347,7 +347,7 @@ public func merge<S: Sequence where S.Iterator.Element: EventProducerType>(seque
   return EventProducer { sink in
     let compositeDisposable = CompositeDisposable()
     sequence.forEach { producer in
-      compositeDisposable += producer.observe(observer: sink)
+      compositeDisposable += producer.observe(sink)
     }
     return compositeDisposable
   }

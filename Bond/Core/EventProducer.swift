@@ -107,7 +107,7 @@ public class EventProducer<Event>: EventProducerType {
   }
   
   /// Registers the given observer and returns a disposable that can cancel observing.
-  public func observe(observer: (Event) -> Void) -> DisposableType {
+  public func observe(_ observer: (Event) -> Void) -> DisposableType {
     
     if lifecycle == .Managed {
       selfReference?.retain()
