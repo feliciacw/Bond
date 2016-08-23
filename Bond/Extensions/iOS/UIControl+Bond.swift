@@ -29,7 +29,7 @@ import UIKit
   weak var control: UIControl?
   let sink: (UIControlEvents) -> Void
   
-  init(control: UIControl, sink: (UIControlEvents) -> Void) {
+  init(control: UIControl, sink: @escaping (UIControlEvents) -> Void) {
     self.control = control
     self.sink = sink
     super.init()
@@ -112,13 +112,13 @@ import UIKit
 
 extension UIControl {
   
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var ControlEventKey = "bnd_ControlEventKey"
     static var ControlBondHelperKey = "bnd_ControlBondHelperKey"
   }
   
   public var bnd_controlEvent: EventProducer<UIControlEvents> {
-    if let bnd_controlEvent: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.ControlEventKey) {
+    if let bnd_controlEvent: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.ControlEventKey) as AnyObject?  {
       return bnd_controlEvent as! EventProducer<UIControlEvents>
     } else {
       var capturedSink: ((UIControlEvents) -> Void)! = nil

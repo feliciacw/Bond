@@ -27,7 +27,7 @@ import Cocoa
 
 extension NSTextView {
 
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var StringKey = "bnd_StringKey"
   }
   

@@ -25,23 +25,23 @@
 import UIKit
 
 @objc public protocol BNDCollectionViewProxyDataSource {
-  @objc optional func collectionView(collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionReusableView
-  @objc optional func collectionView(collectionView: UICollectionView, canMoveItemAtIndexPath indexPath: NSIndexPath) -> Bool
-  @objc optional func collectionView(collectionView: UICollectionView, moveItemAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath)
+  @objc optional func collectionView(collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, atIndexPath indexPath: IndexPath) -> UICollectionReusableView
+  @objc optional func collectionView(collectionView: UICollectionView, canMoveItemAtIndexPath indexPath: IndexPath) -> Bool
+  @objc optional func collectionView(collectionView: UICollectionView, moveItemAtIndexPath sourceIndexPath: IndexPath, toIndexPath destinationIndexPath: IndexPath)
 
   /// Override to specify reload or update
   @objc optional func shouldReloadInsteadOfUpdateCollectionView(collectionView: UICollectionView) -> Bool
 }
 
-private class BNDCollectionViewDataSource<T>: NSObject, UICollectionViewDataSource {
+class BNDCollectionViewDataSource<T>: NSObject, UICollectionViewDataSource {
   
   private let array: ObservableArray<ObservableArray<T>>
   private weak var collectionView: UICollectionView!
-  private let createCell: (NSIndexPath, ObservableArray<ObservableArray<T>>, UICollectionView) -> UICollectionViewCell
+  private let createCell: (IndexPath, ObservableArray<ObservableArray<T>>, UICollectionView) -> UICollectionViewCell
   private weak var proxyDataSource: BNDCollectionViewProxyDataSource?
   private let sectionObservingDisposeBag = DisposeBag()
   
-  private init(array: ObservableArray<ObservableArray<T>>, collectionView: UICollectionView, proxyDataSource: BNDCollectionViewProxyDataSource?, createCell: (NSIndexPath, ObservableArray<ObservableArray<T>>, UICollectionView) -> UICollectionViewCell) {
+  fileprivate init(array: ObservableArray<ObservableArray<T>>, collectionView: UICollectionView, proxyDataSource: BNDCollectionViewProxyDataSource?, createCell: @escaping (IndexPath, ObservableArray<ObservableArray<T>>, UICollectionView) -> UICollectionViewCell) {
     self.collectionView = collectionView
     self.createCell = createCell
     self.proxyDataSource = proxyDataSource
@@ -157,7 +157,7 @@ private class BNDCollectionViewDataSource<T>: NSObject, UICollectionViewDataSour
 }
 
 extension UICollectionView {
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var BondDataSourceKey = "bnd_BondDataSourceKey"
   }
 }
@@ -169,7 +169,7 @@ public extension EventProducerType where
   
   private typealias ElementType = EventType.ObservableArrayEventSequenceType.Iterator.Element.EventType.ObservableArrayEventSequenceType.Iterator.Element
   
-  public func bindTo(collectionView: UICollectionView, proxyDataSource: BNDCollectionViewProxyDataSource? = nil, createCell: (NSIndexPath, ObservableArray<ObservableArray<ElementType>>, UICollectionView) -> UICollectionViewCell) -> DisposableType {
+  public func bindTo(collectionView: UICollectionView, proxyDataSource: BNDCollectionViewProxyDataSource? = nil, createCell: @escaping (IndexPath, ObservableArray<ObservableArray<ElementType>>, UICollectionView) -> UICollectionViewCell) -> DisposableType {
     
     let array: ObservableArray<ObservableArray<ElementType>>
     if let downcastedObservableArray = self as? ObservableArray<ObservableArray<ElementType>> {

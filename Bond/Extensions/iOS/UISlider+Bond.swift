@@ -28,12 +28,12 @@ import UIKit
 
 extension UISlider {
   
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var ValueKey = "bnd_ValueKey"
   }
   
   public var bnd_value: Observable<Float> {
-    if let bnd_value: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.ValueKey) {
+    if let bnd_value: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.ValueKey) as AnyObject? {
       return bnd_value as! Observable<Float>
     } else {
       let bnd_value = Observable<Float>(self.value)

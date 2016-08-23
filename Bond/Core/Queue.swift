@@ -40,11 +40,11 @@ public struct Queue {
     self.queue = queue
   }
   
-  public func after(interval: TimeInterval, block: () -> Void) {
+  public func after(interval: TimeInterval, block: @escaping () -> Void) {
     queue.asyncAfter(deadline: DispatchTime.now() + interval, execute: block)
   }
   
-  public func async(block: () -> Void) {
+  public func async(block: @escaping () -> Void) {
 	queue.async(execute: block)
   }
 

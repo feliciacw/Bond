@@ -43,7 +43,7 @@ public struct MutableObservable<Wrapped>: EventProducerType {
     return observable.replayLength
   }
 
-  public func observe(_ observer: (Wrapped) -> Void) -> DisposableType {
+  public func observe(_ observer: @escaping (Wrapped) -> Void) -> DisposableType {
     return observable.observe(observer)
   }
 }

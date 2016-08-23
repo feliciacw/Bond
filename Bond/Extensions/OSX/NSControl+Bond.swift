@@ -50,7 +50,7 @@ import Cocoa
 
 extension NSControl {
 
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var ControlEventKey = "bnd_ControlEventKey"
     static var ControlBondHelperKey = "bnd_ControlBondHelperKey"
   }

@@ -74,7 +74,7 @@ public final class ObservableArray<ElementType>: EventProducer<ObservableArrayEv
   ///     numbers.append(2)
   ///     ...
   ///   }
-  public func performBatchUpdates( update: @noescape(ObservableArray<ElementType>) -> Void) {
+  public func performBatchUpdates( update: (ObservableArray<ElementType>) -> Void) {
     batchedOperations = []
     workingBatchArray = array
     update(self)
@@ -304,7 +304,7 @@ public extension EventProducerType where EventType: ObservableArrayEventType {
   
   /// Map overload that simplifies mapping of observables that generate ObservableArray events.
   /// Instead of mapping ObservableArray events, it maps the array elements from those events.
-  public func map<T>(transform: (ElementType) -> T) -> EventProducer<ObservableArrayEvent<LazyMapSequence<Self.EventType.ObservableArrayEventSequenceType, T>>> {
+  public func map<T>(transform: @escaping (ElementType) -> T) -> EventProducer<ObservableArrayEvent<LazyMapSequence<Self.EventType.ObservableArrayEventSequenceType, T>>> {
     return EventProducer(replayLength: replayLength) { sink in
       return observe { arrayEvent in
         let sequence = arrayEvent.sequence.lazy.map(transform)
@@ -315,7 +315,7 @@ public extension EventProducerType where EventType: ObservableArrayEventType {
   }
   
   /// Filter overload that filters array elements instead of its events.
-  public func filter(includeElement: (ElementType) -> Bool) -> EventProducer<ObservableArrayEvent<LazyFilterSequence<Self.EventType.ObservableArrayEventSequenceType>>> {
+  public func filter(includeElement: @escaping (ElementType) -> Bool) -> EventProducer<ObservableArrayEvent<LazyFilterSequence<Self.EventType.ObservableArrayEventSequenceType>>> {
     
     var pointers: [Int]? = nil
     
@@ -361,7 +361,7 @@ public extension EventProducerType where EventType: ObservableArrayEventType, Ev
   
   /// Map overload that simplifies mapping of observables that generate ObservableArray events.
   /// Instead of mapping ObservableArray events, it maps the array elements from those events.
-  public func map<T>(transform: (_ElementType) -> T) -> EventProducer<ObservableArrayEvent<LazyMapCollection<Self.EventType.ObservableArrayEventSequenceType, T>>> {
+  public func map<T>(transform: @escaping (_ElementType) -> T) -> EventProducer<ObservableArrayEvent<LazyMapCollection<Self.EventType.ObservableArrayEventSequenceType, T>>> {
     return EventProducer(replayLength: replayLength) { sink in
       return observe { arrayEvent in
         let sequence = arrayEvent.sequence.lazy.map(transform)

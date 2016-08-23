@@ -28,12 +28,12 @@ import UIKit
 
 extension UISwitch {
   
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var OnKey = "bnd_OnKey"
   }
   
   public var bnd_on: Observable<Bool> {
-    if let bnd_on: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.OnKey) {
+    if let bnd_on: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.OnKey) as AnyObject? {
       return bnd_on as! Observable<Bool>
     } else {
       let bnd_on = Observable<Bool>(self.isOn)

@@ -28,20 +28,20 @@ import UIKit
 
 extension UIDatePicker {
   
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var DateKey = "bnd_DateKey"
   }
   
-  public var bnd_date: Observable<NSDate> {
-    if let bnd_date: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.DateKey) {
-      return bnd_date as! Observable<NSDate>
+  public var bnd_date: Observable<Date> {
+    if let bnd_date: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.DateKey) as AnyObject? {
+      return bnd_date as! Observable<Date>
     } else {
-      let bnd_date = Observable<NSDate>(self.date)
+      let bnd_date = Observable<Date>(self.date)
       objc_setAssociatedObject(self, &AssociatedKeys.DateKey, bnd_date, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
       
       var updatingFromSelf: Bool = false
       
-      _ = bnd_date.observeNew { [weak self] (date: NSDate) in
+      _ = bnd_date.observeNew { [weak self] (date: Date) in
         if !updatingFromSelf {
           self?.date = date as Date
         }

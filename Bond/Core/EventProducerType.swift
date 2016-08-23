@@ -34,14 +34,14 @@ public protocol EventProducerType {
   var replayLength: Int { get }
   
   /// Registers the given observer and returns a disposable that can cancel observing.
-  func observe(_ observer: (EventType) -> Void) -> DisposableType
+  func observe(_ observer: @escaping (EventType) -> Void) -> DisposableType
 }
 
 public extension EventProducerType {
   
   /// Registers the observer that will receive only events generated after registering.
   /// A better performing verion of observable.skip(observable.replyLength).observe().
-  public func observeNew(_ observer: (EventType) -> Void) -> DisposableType {
+  public func observeNew(_ observer: @escaping (EventType) -> Void) -> DisposableType {
     var skip: Int = replayLength
     return observe { value in
       if skip > 0 {
@@ -75,7 +75,7 @@ public extension EventProducerType {
   }
   
   /// Transformes each event by the given `transform` function.
-  public func map<T>(_ transform: (EventType) -> T) -> EventProducer<T> {
+  public func map<T>(_ transform: @escaping (EventType) -> T) -> EventProducer<T> {
     return EventProducer(replayLength: replayLength) { sink in
       return observe { event in
         sink(transform(event))
@@ -84,7 +84,7 @@ public extension EventProducerType {
   }
   
   /// Forwards only events for which the given closure returns 'true'.
-  public func filter(_ includeEvent: (EventType) -> Bool) -> EventProducer<EventType> {
+  public func filter(_ includeEvent: @escaping (EventType) -> Bool) -> EventProducer<EventType> {
     return EventProducer(replayLength: replayLength) { sink in
       return observe { event in
         if includeEvent(event) {
@@ -175,7 +175,7 @@ public extension EventProducerType {
     }
   }
   
-  public func flatMap<U: EventProducerType>(strategy: ObservableFlatMapStrategy, transform: (EventType) -> U) -> EventProducer<U.EventType> {
+  public func flatMap<U: EventProducerType>(strategy: ObservableFlatMapStrategy, transform: @escaping (EventType) -> U) -> EventProducer<U.EventType> {
     switch strategy {
     case .Latest:
       return map(transform).switchToLatest()
@@ -184,7 +184,7 @@ public extension EventProducerType {
     }
   }
   
-  public func reduce<T>(initial: T, combine: (T, EventType) -> T) -> EventProducer<T> {
+  public func reduce<T>(initial: T, combine: @escaping (T, EventType) -> T) -> EventProducer<T> {
     return EventProducer { sink in
       var accumulator = initial
       return observe { event in

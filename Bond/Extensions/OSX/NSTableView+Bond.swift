@@ -109,7 +109,7 @@ class BNDTableViewDataSource<DelegateType: BNDTableViewDelegate>: NSObject, NSTa
 }
 
 extension NSTableView {
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var BondDataSourceKey = "bnd_BondDataSourceKey"
   }
 }

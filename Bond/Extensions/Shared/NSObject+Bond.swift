@@ -26,14 +26,14 @@ import Foundation
 
 public extension NSObject {
   
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var DisposeBagKey = "bnd_DisposeBagKey"
     static var AssociatedObservablesKey = "bnd_AssociatedObservablesKey"
   }
   
   // A dispose bag will will dispose upon object deinit.
   public var bnd_bag: DisposeBag {
-    if let disposeBag: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.DisposeBagKey) {
+    if let disposeBag: AnyObject = objc_getAssociatedObject(self, &AssociatedKeys.DisposeBagKey) as AnyObject? {
       return disposeBag as! DisposeBag
     } else {
       let disposeBag = DisposeBag()
@@ -51,7 +51,7 @@ public extension NSObject {
   let keyPath: String
   let listener: (AnyObject?) -> Void
   
-  init(object: NSObject, keyPath: String, options: NSKeyValueObservingOptions, listener: (AnyObject?) -> Void) {
+  init(object: NSObject, keyPath: String, options: NSKeyValueObservingOptions, listener: @escaping (AnyObject?) -> Void) {
     self.object = object
     self.keyPath = keyPath
     self.listener = listener
@@ -67,9 +67,9 @@ public extension NSObject {
     object.removeObserver(self, forKeyPath: keyPath)
   }
 	
-  private override func observeValue(forKeyPath keyPath: String?, of object: AnyObject?, change: [NSKeyValueChangeKey : AnyObject]?, context: UnsafeMutablePointer<Void>?) {
+  private func observeValue(forKeyPath keyPath: String?, of object: AnyObject?, change: [NSKeyValueChangeKey : AnyObject]?, context: UnsafeMutablePointer<Void>?) {
     if context == &BNDKVOObserver.XXContext {
-      if let newValue: AnyObject? = change?[NSKeyValueChangeKey.newKey] {
+      if let newValue: AnyObject = change?[NSKeyValueChangeKey.newKey] {
         listener(newValue)
       }
     }
@@ -100,7 +100,7 @@ public extension Observable {
     
     let _ = observeNew { value in
       if !updatingFromSelf {
-        observer.set(value: value as? AnyObject)
+        observer.set(value: value as AnyObject?)
       }
     }
   }
@@ -133,7 +133,7 @@ public extension Observable where Wrapped: OptionalType {
     
     let _ = observeNew { value in
       if !updatingFromSelf {
-        observer.set(value: value.value as? AnyObject)
+        observer.set(value: value.value as AnyObject?)
       }
     }
   }
@@ -162,7 +162,7 @@ public extension NSObject {
           if let set = set {
             set(value)
           } else {
-            if let value = value as? AnyObject {
+            if let value = value as AnyObject? {
               self?.setValue(value, forKey: key)
             } else {
               self?.setValue(nil, forKey: key)
@@ -194,7 +194,7 @@ public extension NSObject {
           if let set = set {
             set(value)
           } else {
-            self?.setValue(value.value as! AnyObject?, forKey: key)
+            self?.setValue(value.value as AnyObject?, forKey: key)
           }
         }
       

@@ -27,32 +27,32 @@ import UIKit
 @objc public protocol BNDTableViewProxyDataSource {
   @objc optional func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String?
   @objc optional func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String?
-  @objc optional func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool
-  @objc optional func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool
+  @objc optional func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: IndexPath) -> Bool
+  @objc optional func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: IndexPath) -> Bool
   @objc optional func sectionIndexTitlesForTableView(tableView: UITableView) -> [String]?
   @objc optional func tableView(tableView: UITableView, sectionForSectionIndexTitle title: String, atIndex index: Int) -> Int
-  @objc optional func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath)
-  @objc optional func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath)
+  @objc optional func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: IndexPath)
+  @objc optional func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: IndexPath, toIndexPath destinationIndexPath: IndexPath)
   
   /// Override to specify reload or update
   @objc optional func shouldReloadInsteadOfUpdateTableView(tableView: UITableView) -> Bool
   
   /// Override to specify custom row animation when row is being inserted, deleted or updated
-  @objc optional func tableView(tableView: UITableView, animationForRowAtIndexPaths indexPaths: [NSIndexPath]) -> UITableViewRowAnimation
+  @objc optional func tableView(tableView: UITableView, animationForRowAtIndexPaths indexPaths: [IndexPath]) -> UITableViewRowAnimation
   
   /// Override to specify custom row animation when section is being inserted, deleted or updated
   @objc optional func tableView(tableView: UITableView, animationForRowInSections sections: Set<Int>) -> UITableViewRowAnimation
 }
 
-private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
+class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
   
   private let array: ObservableArray<ObservableArray<T>>
   private weak var tableView: UITableView!
-  private let createCell: (NSIndexPath, ObservableArray<ObservableArray<T>>, UITableView) -> UITableViewCell
+  private let createCell: @escaping (IndexPath, ObservableArray<ObservableArray<T>>, UITableView) -> UITableViewCell
   private weak var proxyDataSource: BNDTableViewProxyDataSource?
   private let sectionObservingDisposeBag = DisposeBag()
   
-  private init(array: ObservableArray<ObservableArray<T>>, tableView: UITableView, proxyDataSource: BNDTableViewProxyDataSource?, createCell: (NSIndexPath, ObservableArray<ObservableArray<T>>, UITableView) -> UITableViewCell) {
+  init(array: ObservableArray<ObservableArray<T>>, tableView: UITableView, proxyDataSource: BNDTableViewProxyDataSource?, createCell: @escaping (IndexPath, ObservableArray<ObservableArray<T>>, UITableView) -> UITableViewCell) {
     self.tableView = tableView
     self.createCell = createCell
     self.proxyDataSource = proxyDataSource
@@ -91,7 +91,8 @@ private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
     sectionObservingDisposeBag.dispose()
 
     for (sectionIndex, sectionObservableArray) in array.enumerated() {
-      sectionObservableArray.observeNew { [weak tableView, weak self] arrayEvent in
+      sectionObservableArray.observeNew {
+        [weak tableView, weak self] arrayEvent in
         guard let tableView = tableView else { return }
         if let reload = self?.proxyDataSource?.shouldReloadInsteadOfUpdateTableView?(tableView: tableView) , reload { tableView.reloadData(); return }
         
@@ -190,7 +191,7 @@ private class BNDTableViewDataSource<T>: NSObject, UITableViewDataSource {
 }
 
 extension UITableView {
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var BondDataSourceKey = "bnd_BondDataSourceKey"
   }
 }
@@ -202,7 +203,7 @@ public extension EventProducerType where
   
   private typealias ElementType = EventType.ObservableArrayEventSequenceType.Iterator.Element.EventType.ObservableArrayEventSequenceType.Iterator.Element
   
-  public func bindTo(tableView: UITableView, proxyDataSource: BNDTableViewProxyDataSource? = nil, createCell: (NSIndexPath, ObservableArray<ObservableArray<ElementType>>, UITableView) -> UITableViewCell) -> DisposableType {
+  public func bindTo(tableView: UITableView, proxyDataSource: BNDTableViewProxyDataSource? = nil, createCell: @escaping (IndexPath, ObservableArray<ObservableArray<ElementType>>, UITableView) -> UITableViewCell) -> DisposableType {
     
     let array: ObservableArray<ObservableArray<ElementType>>
     if let downcastedObservableArray = self as? ObservableArray<ObservableArray<ElementType>> {

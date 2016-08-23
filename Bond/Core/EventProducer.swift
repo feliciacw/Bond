@@ -72,7 +72,7 @@ public class EventProducer<Event>: EventProducerType {
   /// Producer closure will be executed immediately. It will receive a sink into which
   /// events can be dispatched. If producer returns a disposable, the observable will store
   /// it and dispose upon [observable's] deallocation.
-  public init(replayLength: Int = 0, lifecycle: EventProducerLifecycle = .Managed, producer: @noescape(Sink) -> DisposableType?) {
+  public init(replayLength: Int = 0, lifecycle: EventProducerLifecycle = .Managed, producer: (Sink) -> DisposableType?) {
     self.lifecycle = lifecycle
     
     let tmpSelfReference = Reference(weak: self)
@@ -107,7 +107,7 @@ public class EventProducer<Event>: EventProducerType {
   }
   
   /// Registers the given observer and returns a disposable that can cancel observing.
-  public func observe(_ observer: (Event) -> Void) -> DisposableType {
+  public func observe(_ observer: @escaping (Event) -> Void) -> DisposableType {
     
     if lifecycle == .Managed {
       selfReference?.retain()
@@ -143,7 +143,7 @@ public class EventProducer<Event>: EventProducerType {
     lock.unlock()
   }
   
-  private func addObserver(observer: (Event) -> Void) -> DisposableType {
+  private func addObserver(observer: @escaping (Event) -> Void) -> DisposableType {
     lock.lock()
     let token = nextToken
     nextToken = nextToken + 1
@@ -153,7 +153,7 @@ public class EventProducer<Event>: EventProducerType {
     return EventProducerDisposable(eventProducer: self, token: token)
   }
   
-  private func removeObserver(disposable: EventProducerDisposable<Event>) {
+  fileprivate func removeObserver(disposable: EventProducerDisposable<Event>) {
     observers.removeValue(forKey: disposable.token)
   }
   
@@ -178,16 +178,17 @@ extension EventProducer: BindableType {
   }
 }
 
-public final class EventProducerDisposable<EventType>: DisposableType {
+public final class EventProducerDisposable<Event>: DisposableType {
   
-  private weak var eventProducer: EventProducer<EventType>!
-  private var token: Int64
+  private weak var eventProducer: EventProducer<Event>!
+  fileprivate var token: Int64
   
   public var isDisposed: Bool {
     return eventProducer == nil
   }
   
-  private init(eventProducer: EventProducer<EventType>, token: Int64) {
+  
+  fileprivate init(eventProducer: EventProducer<Event>, token: Int64) {
     self.eventProducer = eventProducer
     self.token = token
   }

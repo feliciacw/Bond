@@ -26,7 +26,7 @@ import Cocoa
 
 extension NSTextField {
 
-  private struct AssociatedKeys {
+  fileprivate struct AssociatedKeys {
     static var TextKey = "bnd_TextKey"
   }
   
